@@ -1,2 +1,6 @@
 # ignore all PDFs
 *.pdf
+# API keys
+.env
+
+.__pycache__/
