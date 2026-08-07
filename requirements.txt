@@ -1,2 +1,5 @@
 groq 
 python-dotenv
+langchain 
+langchain-community
+pymupdf
