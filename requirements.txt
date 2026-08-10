@@ -4,3 +4,5 @@ langchain
 langchain-community
 pymupdf
 langchain-text-splitters
+sentence-transformers 
+langchain-huggingface
