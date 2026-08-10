@@ -3,3 +3,4 @@ python-dotenv
 langchain 
 langchain-community
 pymupdf
+langchain-text-splitters
