@@ -6,3 +6,5 @@ pymupdf
 langchain-text-splitters
 sentence-transformers 
 langchain-huggingface
+chromadb 
+langchain-chroma
