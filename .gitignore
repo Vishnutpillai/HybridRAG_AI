@@ -1,10 +1,5 @@
-# ignore all PDFs
-*.pdf
-# API keys
 .env
-
-.__pycache__/
-
+*.pdf
+__pycache__/
 *.pyc
-
 data/chroma_db/
