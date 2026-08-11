@@ -9,3 +9,6 @@ langchain-huggingface
 chromadb 
 langchain-chroma
 rank-bm25
+fastapi
+uvicorn 
+python-multipart

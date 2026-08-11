@@ -2,9 +2,9 @@ from pathlib import Path
 
 from langchain_chroma import Chroma
 
-from loader import load_pdfs
-from splitter import split_documents
-from embedded import create_embedding_model
+from .loader import load_pdfs
+from .splitter import split_documents
+from .embedded import create_embedding_model
 
 
 # ============================================================

@@ -1,163 +1,504 @@
-"""
-Confidence scoring utilities for the RAG pipeline.
-
-Important:
-- RRF score is NOT a probability.
-- Dense and BM25 scores are normalized before combining.
-- The resulting confidence is a retrieval confidence estimate.
-"""
+# ============================================================
+# CONFIDENCE MODULE
+# ============================================================
 
 
-def normalize_score(
-    score: float,
-    min_score: float,
-    max_score: float,
-) -> float:
+def _extract_result(result):
     """
-    Normalize a score to the range 0-1.
+    Extract document and retrieval scores from a hybrid result.
 
-    Args:
-        score: Score to normalize.
-        min_score: Minimum score in the result set.
-        max_score: Maximum score in the result set.
+    Supports:
+        1. Dictionary results
+        2. Tuple/list results
 
-    Returns:
-        Normalized score between 0 and 1.
+    Expected dictionary format:
+
+        {
+            "document": document,
+            "dense_score": 0.42,
+            "bm25_score": 14.65,
+            "rrf_score": 0.03
+        }
+
+    Expected tuple format:
+
+        (document, dense_score, bm25_score)
     """
 
-    if max_score == min_score:
-        return 1.0
+    # --------------------------------------------------------
+    # DICTIONARY RESULT
+    # --------------------------------------------------------
 
-    normalized = (
-        (score - min_score)
-        / (max_score - min_score)
+    if isinstance(result, dict):
+
+        document = result.get("document")
+
+        dense_score = result.get(
+            "dense_score",
+            0.0
+        )
+
+        bm25_score = result.get(
+            "bm25_score",
+            0.0
+        )
+
+        rrf_score = result.get(
+            "rrf_score",
+            0.0
+        )
+
+        return (
+            document,
+            float(dense_score or 0.0),
+            float(bm25_score or 0.0),
+            float(rrf_score or 0.0)
+        )
+
+    # --------------------------------------------------------
+    # TUPLE / LIST RESULT
+    # --------------------------------------------------------
+
+    if isinstance(result, (tuple, list)):
+
+        if len(result) >= 4:
+
+            document = result[0]
+            dense_score = result[1]
+            bm25_score = result[2]
+            rrf_score = result[3]
+
+            return (
+                document,
+                float(dense_score or 0.0),
+                float(bm25_score or 0.0),
+                float(rrf_score or 0.0)
+            )
+
+        if len(result) == 3:
+
+            document = result[0]
+            dense_score = result[1]
+            bm25_score = result[2]
+
+            return (
+                document,
+                float(dense_score or 0.0),
+                float(bm25_score or 0.0),
+                0.0
+            )
+
+        if len(result) == 2:
+
+            document = result[0]
+            score = result[1]
+
+            return (
+                document,
+                float(score or 0.0),
+                0.0,
+                0.0
+            )
+
+    raise ValueError(
+        f"Unsupported hybrid result format: {type(result)}"
     )
 
-    # Safety: keep value between 0 and 1
-    return max(0.0, min(1.0, normalized))
 
+# ============================================================
+# DENSE SCORE NORMALIZATION
+# ============================================================
 
-def calculate_retrieval_confidence(
-    dense_score: float,
-    bm25_score: float,
-    dense_scores: list[float],
-    bm25_scores: list[float],
-) -> float:
+def normalize_dense_score(score):
     """
-    Calculate retrieval confidence using
-    dense similarity and BM25 scores.
+    Normalize dense similarity score to 0-1.
+    """
 
-    Dense similarity weight: 60%
-    BM25 keyword score weight: 40%
+    score = float(score)
+
+    return max(
+        0.0,
+        min(score, 1.0)
+    )
+
+
+# ============================================================
+# BM25 SCORE NORMALIZATION
+# ============================================================
+
+def normalize_bm25_scores(scores):
+    """
+    Normalize BM25 scores relative to the
+    strongest retrieved document.
+    """
+
+    if not scores:
+        return []
+
+    positive_scores = [
+        max(float(score), 0.0)
+        for score in scores
+    ]
+
+    max_score = max(
+        positive_scores
+    )
+
+    if max_score <= 0:
+
+        return [
+            0.0
+            for _ in positive_scores
+        ]
+
+    return [
+        min(
+            score / max_score,
+            1.0
+        )
+        for score in positive_scores
+    ]
+
+
+# ============================================================
+# RETRIEVAL CONFIDENCE
+# ============================================================
+
+def calculate_retrieval_confidence(results):
+    """
+    Calculate retrieval confidence.
+
+    Uses:
+        - Dense similarity
+        - BM25 relevance
 
     Returns:
-        Retrieval confidence between 0 and 1.
+        float between 0 and 1
     """
 
-    if not dense_scores or not bm25_scores:
+    if not results:
         return 0.0
 
-    dense_min = min(dense_scores)
-    dense_max = max(dense_scores)
+    dense_scores = []
+    bm25_scores = []
 
-    bm25_min = min(bm25_scores)
-    bm25_max = max(bm25_scores)
+    for result in results:
 
-    normalized_dense = normalize_score(
-        dense_score,
-        dense_min,
-        dense_max,
+        (
+            document,
+            dense_score,
+            bm25_score,
+            rrf_score
+        ) = _extract_result(result)
+
+        dense_scores.append(
+            normalize_dense_score(
+                dense_score
+            )
+        )
+
+        bm25_scores.append(
+            max(
+                float(bm25_score),
+                0.0
+            )
+        )
+
+    # --------------------------------------------------------
+    # NORMALIZE BM25
+    # --------------------------------------------------------
+
+    normalized_bm25 = normalize_bm25_scores(
+        bm25_scores
     )
 
-    normalized_bm25 = normalize_score(
-        bm25_score,
-        bm25_min,
-        bm25_max,
+    # --------------------------------------------------------
+    # DENSE CONFIDENCE
+    # --------------------------------------------------------
+
+    dense_confidence = (
+        sum(dense_scores)
+        / len(dense_scores)
     )
 
-    confidence = (
-        0.6 * normalized_dense
-        + 0.4 * normalized_bm25
+    # --------------------------------------------------------
+    # BM25 CONFIDENCE
+    # --------------------------------------------------------
+
+    if normalized_bm25:
+
+        bm25_confidence = (
+            sum(normalized_bm25)
+            / len(normalized_bm25)
+        )
+
+    else:
+
+        bm25_confidence = 0.0
+
+    # --------------------------------------------------------
+    # COMBINE
+    # --------------------------------------------------------
+
+    retrieval_confidence = (
+        0.5 * dense_confidence
+        +
+        0.5 * bm25_confidence
     )
 
-    return round(confidence, 4)
+    return max(
+        0.0,
+        min(
+            retrieval_confidence,
+            1.0
+        )
+    )
 
+
+# ============================================================
+# EVIDENCE CONFIDENCE
+# ============================================================
+
+def calculate_evidence_confidence(results):
+    """
+    Calculate evidence confidence from
+    retrieved document content.
+    """
+
+    if not results:
+        return 0.0
+
+    valid_documents = []
+
+    for result in results:
+
+        (
+            document,
+            dense_score,
+            bm25_score,
+            rrf_score
+        ) = _extract_result(result)
+
+        if document is None:
+            continue
+
+        content = getattr(
+            document,
+            "page_content",
+            ""
+        )
+
+        if not content:
+            continue
+
+        content = content.strip()
+
+        if len(content) >= 50:
+
+            valid_documents.append(
+                content
+            )
+
+    if not valid_documents:
+        return 0.0
+
+    # --------------------------------------------------------
+    # CHUNK COVERAGE
+    # --------------------------------------------------------
+
+    chunk_factor = min(
+        len(valid_documents) / 5,
+        1.0
+    )
+
+    # --------------------------------------------------------
+    # CONTENT QUALITY
+    # --------------------------------------------------------
+
+    quality_scores = []
+
+    for content in valid_documents:
+
+        length = len(content)
+
+        if length >= 500:
+
+            quality = 1.0
+
+        elif length >= 300:
+
+            quality = 0.9
+
+        elif length >= 200:
+
+            quality = 0.8
+
+        elif length >= 100:
+
+            quality = 0.6
+
+        else:
+
+            quality = 0.4
+
+        quality_scores.append(
+            quality
+        )
+
+    text_quality = (
+        sum(quality_scores)
+        / len(quality_scores)
+    )
+
+    # --------------------------------------------------------
+    # FINAL EVIDENCE CONFIDENCE
+    # --------------------------------------------------------
+
+    evidence_confidence = (
+        0.5 * chunk_factor
+        +
+        0.5 * text_quality
+    )
+
+    return max(
+        0.0,
+        min(
+            evidence_confidence,
+            1.0
+        )
+    )
+
+
+# ============================================================
+# OVERALL CONFIDENCE
+# ============================================================
 
 def calculate_overall_confidence(
-    retrieval_confidence: float,
-    evidence_confidence: float,
-) -> float:
+    retrieval_confidence,
+    evidence_confidence
+):
     """
-    Calculate an overall confidence estimate.
+    Combine retrieval and evidence confidence.
 
-    Retrieval confidence: 60%
-    Evidence confidence: 40%
+    Important:
+    This is a heuristic score, NOT a calibrated probability.
     """
 
-    overall = (
-        0.6 * retrieval_confidence
-        + 0.4 * evidence_confidence
+    retrieval_confidence = max(
+        0.0,
+        min(
+            float(retrieval_confidence),
+            1.0
+        )
     )
 
-    return round(overall, 4)
+    evidence_confidence = max(
+        0.0,
+        min(
+            float(evidence_confidence),
+            1.0
+        )
+    )
 
+    # Retrieval is slightly more important.
+    overall_confidence = (
+        0.6 * retrieval_confidence
+        +
+        0.4 * evidence_confidence
+    )
+
+    return {
+        "retrieval_confidence": round(
+            retrieval_confidence,
+            2
+        ),
+
+        "evidence_confidence": round(
+            evidence_confidence,
+            2
+        ),
+
+        "overall_confidence": round(
+            overall_confidence,
+            2
+        )
+    }
+
+
+# ============================================================
+# COMPLETE CONFIDENCE CALCULATION
+# ============================================================
+
+def calculate_confidence(results):
+    """
+    Calculate all confidence dimensions at once.
+
+    Returns:
+
+        {
+            "retrieval_confidence": ...,
+            "evidence_confidence": ...,
+            "overall_confidence": ...
+        }
+    """
+
+    retrieval_confidence = (
+        calculate_retrieval_confidence(
+            results
+        )
+    )
+
+    evidence_confidence = (
+        calculate_evidence_confidence(
+            results
+        )
+    )
+
+    return calculate_overall_confidence(
+        retrieval_confidence,
+        evidence_confidence
+    )
+
+
+# ============================================================
+# TEST
+# ============================================================
 
 if __name__ == "__main__":
 
-    print("=" * 60)
+    print("\n" + "=" * 60)
     print("CONFIDENCE MODULE TEST")
     print("=" * 60)
 
-    dense_scores = [
-        0.92,
-        0.81,
-        0.76,
-        0.70,
-        0.65,
-    ]
+    # Dummy retrieval values
+    retrieval_confidence = 0.97
+    evidence_confidence = 1.00
 
-    bm25_scores = [
-        18.5,
-        14.2,
-        11.8,
-        9.4,
-        7.1,
-    ]
-
-    dense_score = dense_scores[0]
-    bm25_score = bm25_scores[0]
-
-    retrieval_confidence = calculate_retrieval_confidence(
-        dense_score=dense_score,
-        bm25_score=bm25_score,
-        dense_scores=dense_scores,
-        bm25_scores=bm25_scores,
+    confidence = calculate_overall_confidence(
+        retrieval_confidence,
+        evidence_confidence
     )
-
-    evidence_confidence = 0.90
-
-    overall_confidence = calculate_overall_confidence(
-        retrieval_confidence=retrieval_confidence,
-        evidence_confidence=evidence_confidence,
-    )
-
-    print(f"\nDense score: {dense_score}")
-    print(f"BM25 score: {bm25_score}")
 
     print(
         f"\nRetrieval confidence: "
-        f"{retrieval_confidence}"
+        f"{confidence['retrieval_confidence']:.2f}"
     )
 
     print(
         f"Evidence confidence: "
-        f"{evidence_confidence}"
+        f"{confidence['evidence_confidence']:.2f}"
     )
 
     print(
         f"Overall confidence: "
-        f"{overall_confidence}"
+        f"{confidence['overall_confidence']:.2f}"
+    )
+
+    print("\n⚠️ Note:")
+    print(
+        "These are heuristic confidence scores, "
+        "not calibrated probabilities."
     )
 
     print("\n✅ Confidence module working!")
-
+    

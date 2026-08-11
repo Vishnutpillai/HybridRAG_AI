@@ -174,7 +174,7 @@ def analyze_chunks(chunks):
 
 if __name__ == "__main__":
 
-    from loader import load_pdfs
+    from .loader import load_pdfs
 
     pdf_paths = [
         "data/raw/Machine_Learning.pdf",

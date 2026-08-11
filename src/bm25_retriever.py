@@ -1,7 +1,7 @@
 from rank_bm25 import BM25Okapi
 
-from loader import load_pdfs
-from splitter import split_documents
+from .loader import load_pdfs
+from .splitter import split_documents
 
 
 # ============================================================
@@ -72,7 +72,7 @@ def create_bm25_retriever(chunks):
     print("✅ BM25 index created!")
     print(f"📄 Documents indexed: {len(chunks)}")
 
-    return bm25, tokenized_corpus
+    return bm25
 
 
 # ============================================================

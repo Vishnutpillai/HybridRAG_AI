@@ -1,9 +1,9 @@
 from rank_bm25 import BM25Okapi
 from langchain_chroma import Chroma
 
-from loader import load_pdfs
-from splitter import split_documents
-from embedded import create_embedding_model
+from .loader import load_pdfs
+from .splitter import split_documents
+from .embedded import create_embedding_model
 
 
 # ============================================================
@@ -63,14 +63,28 @@ def vector_search(
     query,
     k=TOP_K
 ):
-    """Retrieve documents using ChromaDB."""
+    """
+    Retrieve documents using ChromaDB
+    and keep their similarity scores.
+    """
 
-    results = vector_store.similarity_search(
+    results = vector_store.similarity_search_with_score(
         query,
         k=k
     )
 
-    return results
+    formatted_results = []
+
+    for document, score in results:
+
+        formatted_results.append(
+            {
+                "document": document,
+                "dense_score": float(score),
+            }
+        )
+
+    return formatted_results
 
 
 # ============================================================
@@ -83,7 +97,10 @@ def bm25_search(
     query,
     k=TOP_K
 ):
-    """Retrieve documents using BM25."""
+    """
+    Retrieve documents using BM25
+    and keep their BM25 scores.
+    """
 
     tokenized_query = tokenize(query)
 
@@ -97,10 +114,16 @@ def bm25_search(
         reverse=True
     )[:k]
 
-    results = [
-        chunks[index]
-        for index in ranked_indexes
-    ]
+    results = []
+
+    for index in ranked_indexes:
+
+        results.append(
+            {
+                "document": chunks[index],
+                "bm25_score": float(scores[index]),
+            }
+        )
 
     return results
 
@@ -112,10 +135,6 @@ def bm25_search(
 def document_id(document):
     """
     Create a unique identifier for a chunk.
-
-    Source + page + content are used so that
-    the same chunk retrieved by both systems
-    can be recognized as the same document.
     """
 
     source = document.metadata.get(
@@ -147,25 +166,28 @@ def reciprocal_rank_fusion(
     """
     Combine vector and BM25 rankings using RRF.
 
-    RRF score:
-
-        1 / (k + rank)
-
-    Documents appearing in both retrieval
-    lists receive contributions from both.
+    Keeps:
+        - dense score
+        - BM25 score
+        - RRF score
     """
 
     scores = {}
     documents = {}
+    dense_scores = {}
+    bm25_scores = {}
 
     # --------------------------------------------------------
     # Vector search rankings
     # --------------------------------------------------------
 
-    for rank, document in enumerate(
+    for rank, result in enumerate(
         vector_results,
         start=1
     ):
+
+        document = result["document"]
+        dense_score = result["dense_score"]
 
         doc_id = document_id(document)
 
@@ -175,15 +197,20 @@ def reciprocal_rank_fusion(
         )
 
         documents[doc_id] = document
+
+        dense_scores[doc_id] = dense_score
 
     # --------------------------------------------------------
     # BM25 rankings
     # --------------------------------------------------------
 
-    for rank, document in enumerate(
+    for rank, result in enumerate(
         bm25_results,
         start=1
     ):
+
+        document = result["document"]
+        bm25_score = result["bm25_score"]
 
         doc_id = document_id(document)
 
@@ -194,8 +221,10 @@ def reciprocal_rank_fusion(
 
         documents[doc_id] = document
 
+        bm25_scores[doc_id] = bm25_score
+
     # --------------------------------------------------------
-    # Sort by combined score
+    # Sort by RRF score
     # --------------------------------------------------------
 
     ranked_results = sorted(
@@ -206,13 +235,23 @@ def reciprocal_rank_fusion(
 
     results = []
 
-    for doc_id, score in ranked_results:
+    for doc_id, rrf_score in ranked_results:
+
+        document = documents[doc_id]
 
         results.append(
-            (
-                documents[doc_id],
-                score
-            )
+            {
+                "document": document,
+                "dense_score": dense_scores.get(
+                    doc_id,
+                    0.0
+                ),
+                "bm25_score": bm25_scores.get(
+                    doc_id,
+                    0.0
+                ),
+                "rrf_score": float(rrf_score),
+            }
         )
 
     return results
@@ -235,6 +274,7 @@ def hybrid_search(
     1. ChromaDB semantic search
     2. BM25 keyword search
     3. RRF score fusion
+    4. Return all retrieval scores
     """
 
     print("\n" + "=" * 60)
@@ -243,7 +283,10 @@ def hybrid_search(
 
     print(f"\n❓ Query: {query}")
 
+    # --------------------------------------------------------
     # Vector retrieval
+    # --------------------------------------------------------
+
     vector_results = vector_search(
         vector_store,
         query,
@@ -255,7 +298,10 @@ def hybrid_search(
         f"{len(vector_results)}"
     )
 
+    # --------------------------------------------------------
     # BM25 retrieval
+    # --------------------------------------------------------
+
     bm25_results = bm25_search(
         bm25,
         chunks,
@@ -268,13 +314,15 @@ def hybrid_search(
         f"{len(bm25_results)}"
     )
 
-    # Combine rankings
+    # --------------------------------------------------------
+    # RRF fusion
+    # --------------------------------------------------------
+
     fused_results = reciprocal_rank_fusion(
         vector_results,
         bm25_results
     )
 
-    # Return top results
     final_results = fused_results[:top_k]
 
     print(
@@ -295,18 +343,34 @@ def display_results(results):
     print("HYBRID SEARCH RESULTS")
     print("=" * 60)
 
-    for rank, (document, score) in enumerate(
+    for rank, result in enumerate(
         results,
         start=1
     ):
+
+        document = result["document"]
+
+        dense_score = result["dense_score"]
+        bm25_score = result["bm25_score"]
+        rrf_score = result["rrf_score"]
 
         print("\n" + "-" * 60)
         print(f"RESULT {rank}")
         print("-" * 60)
 
         print(
-            f"\n📊 RRF Score: "
-            f"{score:.6f}"
+            f"\n🔵 Dense Score: "
+            f"{dense_score:.6f}"
+        )
+
+        print(
+            f"🟢 BM25 Score: "
+            f"{bm25_score:.6f}"
+        )
+
+        print(
+            f"🟣 RRF Score: "
+            f"{rrf_score:.6f}"
         )
 
         print("\n📄 Source:")
@@ -367,18 +431,34 @@ def validate_hybrid(
         "Hybrid search returned results":
             len(hybrid_results) > 0,
 
+        "Dense scores available":
+            all(
+                "dense_score" in result
+                for result in hybrid_results
+            ),
+
+        "BM25 scores available":
+            all(
+                "bm25_score" in result
+                for result in hybrid_results
+            ),
+
+        "RRF scores available":
+            all(
+                "rrf_score" in result
+                for result in hybrid_results
+            ),
+
         "Hybrid results contain metadata":
             all(
-                document.metadata
-                for document, score
-                in hybrid_results
+                result["document"].metadata
+                for result in hybrid_results
             ),
 
         "Hybrid results contain content":
             all(
-                len(document.page_content) > 0
-                for document, score
-                in hybrid_results
+                len(result["document"].page_content) > 0
+                for result in hybrid_results
             ),
     }
 
@@ -481,10 +561,30 @@ if __name__ == "__main__":
         )
 
         # ====================================================
-        # STEP 6: RUN INDIVIDUAL RETRIEVERS
+        # STEP 6: RUN HYBRID SEARCH
         # ====================================================
 
         query = "What is machine learning?"
+
+        hybrid_results = hybrid_search(
+            vector_store,
+            bm25,
+            chunks,
+            query,
+            top_k=TOP_K
+        )
+
+        # ====================================================
+        # STEP 7: DISPLAY RESULTS
+        # ====================================================
+
+        display_results(
+            hybrid_results
+        )
+
+        # ====================================================
+        # STEP 8: VALIDATE
+        # ====================================================
 
         vector_results = vector_search(
             vector_store,
@@ -498,30 +598,6 @@ if __name__ == "__main__":
             query,
             k=TOP_K
         )
-
-        # ====================================================
-        # STEP 7: HYBRID SEARCH
-        # ====================================================
-
-        hybrid_results = hybrid_search(
-            vector_store,
-            bm25,
-            chunks,
-            query,
-            top_k=TOP_K
-        )
-
-        # ====================================================
-        # STEP 8: DISPLAY RESULTS
-        # ====================================================
-
-        display_results(
-            hybrid_results
-        )
-
-        # ====================================================
-        # STEP 9: VALIDATE
-        # ====================================================
 
         is_valid = validate_hybrid(
             chunks,
@@ -566,4 +642,3 @@ if __name__ == "__main__":
         )
 
         raise
-    

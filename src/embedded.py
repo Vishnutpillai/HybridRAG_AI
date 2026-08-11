@@ -39,8 +39,8 @@ def create_embedding_model():
 
 if __name__ == "__main__":
 
-    from loader import load_pdfs
-    from splitter import split_documents
+    from .loader import load_pdfs
+    from .splitter import split_documents
 
     # ========================================================
     # PDF FILES
@@ -230,3 +230,4 @@ if __name__ == "__main__":
         print(f"\nError: {str(e)}")
 
         raise
+    
