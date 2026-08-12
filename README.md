@@ -1,688 +1,657 @@
-# 🚀 Hybrid RAG API - Production-Ready Q&A System
+Hybrid RAG AI Assistant
+<p align="center"> <strong>Production-oriented Retrieval-Augmented Generation system for document-grounded question answering</strong> </p>
 
-<div align="center">
+<p align="center"> <a href="https://github.com/Vishnutpillai/rag-hybrid-search"> <img src="https://img.shields.io/badge/GitHub-Repository-181717?logo=github" alt="GitHub"> </a> <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11"> <img src="https://img.shields.io/badge/FastAPI-API-009688?logo=fastapi&logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/Streamlit-Frontend-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit"> <img src="https://img.shields.io/badge/ChromaDB-Vector%20Store-5B4BDB" alt="ChromaDB"> <img src="https://img.shields.io/badge/BM25-Keyword%20Search-2F855A" alt="BM25"> <img src="https://img.shields.io/badge/Groq-LLM-F55036" alt="Groq"> <img src="https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white" alt="Docker"> </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
-[![Groq](https://img.shields.io/badge/Groq-LLaMA%203-FF6B6B.svg)](https://groq.com/)
-[![FAISS](https://img.shields.io/badge/FAISS-Vector%20DB-purple.svg)](https://github.com/facebookresearch/faiss)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](#)
+Overview
+Hybrid RAG AI Assistant is an end-to-end Retrieval-Augmented Generation (RAG) application that answers questions using information retrieved from PDF documents.
 
-**🎯 Intelligent Q&A System | 🔍 Vector Search | 🤖 LLM Powered | ⚡ Lightning Fast**
+The system combines:
 
-[🚀 Quick Start](#-quick-start) • [📚 Documentation](#-documentation) • [💡 Examples](#-examples) • [🤝 Contribute](#-contributing)
+Semantic vector retrieval using ChromaDB and embeddings
 
----
+Lexical keyword retrieval using BM25
 
-![RAG Banner](https://img.shields.io/badge/Retrieval%20Augmented%20Generation-RAG%20Pipeline-2196F3?style=for-the-badge)
-![2024](https://img.shields.io/badge/2024-Latest-blue?style=for-the-badge)
+Reciprocal Rank Fusion (RRF) for hybrid ranking
 
-</div>
+Confidence scoring for retrieval and evidence quality
 
----
+Groq LLM for grounded answer generation
 
-## 🎯 What's This About?
+FastAPI for the backend REST API
 
-> **Transform your PDFs into an intelligent Q&A system in minutes!**
+Streamlit for the interactive web interface
 
-Ask questions about your documents and get **context-aware answers powered by AI**. No hallucinations. Pure knowledge from your files.
+Docker for reproducible backend deployment
 
-```
-📄 Your PDFs → 🔍 Smart Search → 🤖 LLM Magic → 💡 Perfect Answer
-```
+The current document collection contains 1,127 PDF pages and produces 3,107 filtered chunks.
 
----
+Grounding principle: the LLM is instructed to answer from retrieved document context rather than relying on outside knowledge. When the required information is not found in the provided documents, the system can return a grounded "not found" response.
 
-## ⚡ Quick Demo
+Key Features
+Feature	Description
+📄 PDF ingestion	Loads PDF documents from data/raw/
+✂️ Recursive chunking	Splits documents into overlapping text chunks
+🧠 Embeddings	Generates semantic representations for chunks
+🗄️ ChromaDB	Persistent vector database for semantic retrieval
+🔎 BM25	Keyword-based retrieval for exact terminology
+🔀 Hybrid Search	Combines semantic and lexical retrieval
+🏆 RRF	Fuses independent rankings into a unified ranking
+📊 Confidence	Calculates retrieval, evidence, and overall confidence
+🤖 Groq	Generates answers from retrieved context
+⚡ FastAPI	Exposes the RAG pipeline through an API
+🖥️ Streamlit	Provides an interactive question-answering UI
+🐳 Docker	Containerizes the FastAPI backend
+📚 Source tracking	Returns source PDF, page, and retrieval scores
+Architecture
+High-level flow
+                         ┌─────────────────────┐
+                         │        User         │
+                         └──────────┬──────────┘
+                                    │
+                          ┌─────────▼─────────┐
+                          │   Streamlit UI    │
+                          │   localhost:8501  │
+                          └─────────┬─────────┘
+                                    │ HTTP
+                                    ▼
+                          ┌───────────────────┐
+                          │     FastAPI       │
+                          │   localhost:8000  │
+                          └─────────┬─────────┘
+                                    │
+                                    ▼
+                    ┌─────────────────────────────┐
+                    │       Hybrid RAG Pipeline  │
+                    └─────────────┬───────────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+          ┌─────────▼─────────┐       ┌────────▼────────┐
+          │ Semantic Retrieval│       │ Keyword Retrieval│
+          │     ChromaDB      │       │       BM25       │
+          └─────────┬─────────┘       └────────┬────────┘
+                    │                           │
+                    └─────────────┬─────────────┘
+                                  ▼
+                        ┌──────────────────┐
+                        │ RRF / Hybrid Rank│
+                        └────────┬─────────┘
+                                 ▼
+                        ┌──────────────────┐
+                        │ Confidence Score │
+                        └────────┬─────────┘
+                                 ▼
+                        ┌──────────────────┐
+                        │ Context Builder  │
+                        └────────┬─────────┘
+                                 ▼
+                        ┌──────────────────┐
+                        │     Groq LLM     │
+                        └────────┬─────────┘
+                                 ▼
+                 ┌─────────────────────────────────┐
+                 │ Answer + Confidence + Sources  │
+                 └─────────────────────────────────┘
+Document ingestion pipeline
+PDF files
+   │
+   ▼
+PyMuPDF / PDF loader
+   │
+   ▼
+Document pages
+   │
+   ▼
+RecursiveCharacterTextSplitter
+   │
+   ├──────────────► Embeddings ─────► ChromaDB
+   │
+   └──────────────► Tokenization ───► BM25 index
+Query pipeline
+Question
+   │
+   ├──────────────► ChromaDB semantic search
+   │
+   └──────────────► BM25 keyword search
+                         │
+                         ▼
+                  Reciprocal Rank Fusion
+                         │
+                         ▼
+                  Top-K retrieved chunks
+                         │
+                         ▼
+                  Confidence calculation
+                         │
+                         ▼
+                    RAG prompt
+                         │
+                         ▼
+                      Groq LLM
+                         │
+                         ▼
+               Grounded final answer
+Project Structure
+rag-hybrid-search/
+│
+├── data/
+│   ├── raw/
+│   │   ├── Machine_Learning.pdf
+│   │   └── Deep_Learning.pdf
+│   │
+│   └── chroma_db/
+│
+├── frontend/
+│   └── ui.py
+│
+├── src/
+│   ├── __init__.py
+│   ├── api.py
+│   ├── bm25_retriever.py
+│   ├── confidence.py
+│   ├── embedded.py
+│   ├── groq_con.py
+│   ├── hybrid_search.py
+│   ├── loader.py
+│   ├── rag_pipeline.py
+│   ├── splitter.py
+│   └── vectorstore.py
+│
+├── .env
+├── .gitignore
+├── Dockerfile
+├── requirements.txt
+└── README.md
+.env, PDF files, generated ChromaDB data, Python cache files, and other local artifacts should remain excluded through .gitignore.
 
-### **Try It Now! (30 seconds)**
+Current Dataset / Index Statistics
+Metric	Current value
+PDF documents	2
+Total pages	1,127
+Initial chunks	3,113
+Small chunks removed	6
+Final chunks	3,107
+Machine Learning chunks	676
+Deep Learning chunks	2,431
+Default retrieval	Top 5
+Vector store	ChromaDB
+Keyword retriever	BM25Okapi
+Fusion method	Reciprocal Rank Fusion
+Tech Stack
+Backend
+Python 3.11
 
-```bash
-# 1. Clone & Setup (2 min)
-git clone https://github.com/YOUR_USERNAME/rag-hybrid-search.git
+FastAPI
+
+Uvicorn
+
+Retrieval
+ChromaDB
+
+Sentence-transformer embeddings
+
+BM25Okapi
+
+Reciprocal Rank Fusion (RRF)
+
+LLM
+Groq API
+
+LLaMA 3.3 70B Versatile
+
+Document Processing
+PyMuPDF / PDF loader
+
+LangChain text splitting utilities
+
+Frontend
+Streamlit
+
+Requests
+
+Deployment
+Docker
+
+Uvicorn
+
+Environment-based configuration
+
+Installation
+1. Clone the repository
+git clone https://github.com/Vishnutpillai/rag-hybrid-search.git
 cd rag-hybrid-search
+2. Create the Conda environment
+conda create -n rag python=3.11
+conda activate rag
+3. Install dependencies
 pip install -r requirements.txt
+4. Configure environment variables
+Create a .env file in the project root:
 
-# 2. Build Vector DB (5 min)
-python src/vectorstore.py
+GROQ_API_KEY=your_groq_api_key
+Do not commit .env to GitHub.
 
-# 3. Start Server (instant)
-python src/main.py
+Run the RAG Pipeline Directly
+To test the complete RAG pipeline from the terminal:
 
-# 4. Ask Questions! 🎉
-curl -X POST "http://localhost:8000/ask" \
-  -H "Content-Type: application/json" \
-  -d '{"question": "What is machine learning?"}'
-```
+python -m src.rag_pipeline
+Then enter a question such as:
 
-**Response in 2-5 seconds:**
-```json
+What is deep learning?
+The pipeline performs:
+
+Load PDFs
+   ↓
+Split documents
+   ↓
+Load embeddings
+   ↓
+Load ChromaDB
+   ↓
+Build BM25 index
+   ↓
+Hybrid search
+   ↓
+Confidence calculation
+   ↓
+Build RAG prompt
+   ↓
+Groq
+   ↓
+Answer + sources
+Run the FastAPI Backend with Docker
+Build the Docker image
+docker build -t hybrid-rag-ai .
+Run the backend
+From the project root:
+
+docker run --env-file .env -p 8000:8000 -v "%cd%\data:/app/data" hybrid-rag-ai
+The API will be available at:
+
+http://localhost:8000
+Swagger documentation:
+
+http://localhost:8000/docs
+FastAPI API
+POST /ask
+Example request:
+
 {
-  "question": "What is machine learning?",
-  "answer": "Machine learning is a subset of artificial intelligence...",
+  "question": "What is deep learning?"
+}
+Example response:
+
+{
+  "question": "What is deep learning?",
+  "answer": "Deep learning is ...",
+  "confidence": {
+    "retrieval_confidence": 0.82,
+    "evidence_confidence": 1.0,
+    "overall_confidence": 0.91
+  },
+  "retrieved_chunks": 5,
   "sources": [
-    {"file": "Machine_Learning.pdf", "page": 15},
-    {"file": "Deep_Learning.pdf", "page": 3}
+    {
+      "rank": 1,
+      "source": "data\\raw\\Deep_Learning.pdf",
+      "page": 42,
+      "dense_score": 0.81,
+      "bm25_score": 15.2,
+      "rrf_score": 0.03
+    }
   ]
 }
-```
-
----
-
-## 🌟 Why You'll Love This
-
-| Feature | Benefit | Speed |
-|---------|---------|-------|
-| 🎯 **Semantic Search** | Find relevant info instantly | ~100ms |
-| 🧠 **AI-Powered Answers** | Smart, context-aware responses | ~2-5s |
-| ⚡ **Lightning Fast** | FAISS vector search scales to millions | O(1) |
-| 🔒 **Secure** | API keys never exposed | ✅ Safe |
-| 🚀 **Production Ready** | Deploy instantly | Plug & Play |
-| 📊 **Scalable** | Handle 1000s of documents | Proven |
-
----
-
-## 🎬 Live Examples
-
-### Example 1: Simple Question
-
-```bash
-❓ Question: "What is machine learning?"
-
-💡 Answer: 
-Machine learning is a subset of artificial intelligence that enables 
-computers to learn from data without being explicitly programmed. It uses 
-algorithms to identify patterns and make predictions...
-
-📚 Sources: ML.pdf (page 15), DL.pdf (page 3)
-⏱️ Response Time: 2.3 seconds
-```
-
-### Example 2: Complex Question
-
-```bash
-❓ Question: "Explain the differences between supervised and unsupervised learning"
-
-💡 Answer:
-Supervised learning requires labeled training data where both input and output 
-are known, while unsupervised learning finds patterns in unlabeled data...
-
-📚 Sources: ML.pdf (page 42, 85), DL.pdf (page 156)
-⏱️ Response Time: 2.8 seconds
-```
-
-### Example 3: Deep Dive
-
-```bash
-❓ Question: "How does backpropagation work in neural networks?"
-
-💡 Answer:
-Backpropagation is a method for training neural networks by calculating 
-gradients of the loss function with respect to weights...
-[Full detailed explanation]
-
-📚 Sources: DL.pdf (page 234, 267, 289)
-⏱️ Response Time: 3.1 seconds
-```
-
----
-
-## 🚀 Quick Start (5 Minutes)
-
-### **Step 1: Clone Repository**
-
-```bash
-git clone https://github.com/YOUR_USERNAME/rag-hybrid-search.git
-cd rag-hybrid-search
-```
-
-### **Step 2: Setup Environment**
-
-```bash
-# Create virtual environment
-python -m venv venv
-
-# Activate
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### **Step 3: Configure API Key**
-
-```bash
-# Copy template
-cp .env.example .env
-
-# Edit .env and add your Groq API key
-# GROQ_API_KEY=your_key_here
-```
-
-**Get Free API Key:** [console.groq.com](https://console.groq.com)
-
-### **Step 4: Build Vector Database**
-
-```bash
-python src/vectorstore.py
-```
-
-```
-🔄 Loading embedding model...
-🔄 Creating embeddings for all chunks...
-(This takes 2-3 minutes on first run)
-
-✅ Vector database created successfully!
-✅ Saved to: vector_db/
-```
-
-### **Step 5: Start Server**
-
-```bash
-python src/main.py
-```
-
-```
-INFO:     Uvicorn running on http://127.0.0.1:8000
-INFO:     Application startup complete
-```
-
-### **Step 6: Ask Questions!**
-
-#### Option A: Web Interface
-Go to: **http://localhost:8000/docs**
-
-#### Option B: Command Line
-```bash
-curl -X POST "http://localhost:8000/ask" \
-  -H "Content-Type: application/json" \
-  -d '{"question": "What is machine learning?"}'
-```
-
-#### Option C: Python
-```python
+Test with Python
 import requests
 
 response = requests.post(
     "http://localhost:8000/ask",
-    json={"question": "What is machine learning?"}
+    json={"question": "What is deep learning?"},
+    timeout=120
 )
-print(response.json()["answer"])
-```
 
----
+print(response.json())
+Run the Streamlit Frontend
+The frontend is located at:
 
-## 📚 Documentation
+frontend/ui.py
+Start the FastAPI Docker backend first.
 
-### 🔗 Full Guides
-- **[API Reference](./API_REFERENCE.md)** - Complete endpoint documentation
-- **[Architecture Guide](./ARCHITECTURE.md)** - System design & flow
-- **[Deployment Guide](./DEPLOYMENT.md)** - Production setup
-- **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute
+Then open a second terminal:
 
-### 📖 Quick Links
-- [Configuration Options](#configuration)
-- [Performance Metrics](#performance)
-- [Troubleshooting](#troubleshooting)
-- [FAQ](#faq)
+conda activate rag
+streamlit run frontend/ui.py
+Open:
 
----
+http://localhost:8501
+Frontend features
+The Streamlit interface displays:
 
-## 💡 Examples
+Question input
 
-### Python SDK
+Generated answer
 
-```python
-from src.rag_system import rag_query
+Retrieval confidence
 
-# Single question
-answer = rag_query("What is deep learning?")
-print(answer)
+Evidence confidence
 
-# Batch questions
-questions = [
-    "What is machine learning?",
-    "Explain neural networks",
-    "What is backpropagation?"
-]
+Overall confidence
 
-for q in questions:
-    answer = rag_query(q, k=3)
-    print(f"Q: {q}\nA: {answer}\n")
-```
+Number of retrieved chunks
 
-### JavaScript/Node.js
+Source PDF
 
-```javascript
-const fetch = require('node-fetch');
+Page number
 
-async function ask(question) {
-  const response = await fetch('http://localhost:8000/ask', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, top_k: 3 })
-  });
-  
-  const data = await response.json();
-  console.log(data.answer);
+Dense retrieval score
+
+BM25 score
+
+RRF score
+
+Raw API response
+
+Running the Full Application
+You need two processes during local development.
+
+Terminal 1 — FastAPI
+cd C:\Users\abhig\Downloads\rag-hybrid-search
+conda activate rag
+
+docker run --env-file .env -p 8000:8000 -v "%cd%\data:/app/data" hybrid-rag-ai
+Terminal 2 — Streamlit
+cd C:\Users\abhig\Downloads\rag-hybrid-search
+conda activate rag
+
+streamlit run frontend/ui.py
+Then open:
+
+http://localhost:8501
+Architecture:
+
+Browser
+   │
+   ▼
+Streamlit :8501
+   │
+   │ POST /ask
+   ▼
+FastAPI :8000
+   │
+   ▼
+Hybrid RAG
+   │
+   ▼
+Groq
+Retrieval Strategy
+1. Semantic Retrieval
+The question is embedded and compared with document embeddings stored in ChromaDB.
+
+This helps retrieve conceptually similar text even when the exact words are different.
+
+2. BM25 Retrieval
+The same question is tokenized and searched against the BM25 index.
+
+BM25 is particularly useful for:
+
+Exact terminology
+
+Technical keywords
+
+Named entities
+
+Specific phrases
+
+3. Hybrid Search
+The semantic and BM25 rankings are combined.
+
+Semantic results ──┐
+                   ├──► RRF ──► Hybrid ranking
+BM25 results ──────┘
+This gives the system both semantic and lexical retrieval capabilities.
+
+Confidence Scoring
+The application reports three heuristic confidence values:
+
+Retrieval Confidence
+        +
+Evidence Confidence
+        ↓
+Overall Confidence
+Example:
+
+{
+  "retrieval_confidence": 0.44,
+  "evidence_confidence": 1.0,
+  "overall_confidence": 0.67
 }
+These values are heuristic confidence scores, not calibrated probabilities.
 
-ask("What is machine learning?");
-```
-
-### React Component
-
-```jsx
-import { useState } from 'react';
-
-export default function RAGChat() {
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleAsk = async () => {
-    setLoading(true);
-    const response = await fetch('http://localhost:8000/ask', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question })
-    });
-    const data = await response.json();
-    setAnswer(data.answer);
-    setLoading(false);
-  };
-
-  return (
-    <div>
-      <input 
-        value={question} 
-        onChange={(e) => setQuestion(e.target.value)} 
-        placeholder="Ask a question..."
-      />
-      <button onClick={handleAsk} disabled={loading}>
-        {loading ? 'Thinking...' : 'Ask'}
-      </button>
-      {answer && <p>{answer}</p>}
-    </div>
-  );
-}
-```
-
----
-
-## 📊 Performance & Stats
-
-### **Current Metrics**
-```
-📈 Documents:        1,127 pages
-📊 Chunks:           3,107 high-quality segments
-⚡ Search Speed:      ~100ms (FAISS)
-🤖 LLM Response:      ~2-5 seconds
-🎯 Total Response:    2.5-5.5 seconds
-💾 Memory Usage:      ~700MB (embeddings + FAISS)
-🚀 Throughput:        10-15 req/min (Groq API limited)
-```
-
-### **Benchmarks**
-
-| Operation | Time | Notes |
-|-----------|------|-------|
-| 🔍 Vector Search | 100ms | O(1) with FAISS |
-| 🤖 LLM Generation | 2-5s | Groq latency |
-| 📊 Full Query | 2.5-5.5s | End-to-end |
-| 💾 DB Creation | 5-10m | One-time setup |
-
-### **Scaling**
-
-```
-Current: 3,107 chunks → 2.5-5.5s response
-10x More: 31,070 chunks → ~2.5-5.5s (FAISS scales!)
-100x More: 310,700 chunks → ~2.5-5.5s (same!)
-```
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────┐
-│                  🌐 Client Layer                     │
-│    Web UI  │  Mobile  │  CLI  │  REST API         │
-└────────────────────┬────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────┐
-│          🚀 FastAPI Server (main.py)               │
-│    ┌──────────┐  ┌────────┐  ┌──────────┐         │
-│    │ GET /    │  │GET /   │  │POST /ask │        │
-│    │ (status) │  │health  │  │ (search) │        │
-│    └──────────┘  └────────┘  └──────────┘        │
-└────────────────────┬────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────┐
-│       🧠 RAG Pipeline (rag_system.py)              │
-│  1️⃣ Load Vector DB  →  2️⃣ Search  →  3️⃣ Rank  →  │
-│  4️⃣ Build Context  →  5️⃣ Query LLM  →  6️⃣ Answer │
-└────────────────────┬────────────────────────────────┘
-                     │
-         ┌───────────┴───────────┐
-         │                       │
-    ┌────▼──────┐         ┌──────▼────┐
-    │ 🔍 FAISS  │         │  🤖 Groq  │
-    │ (Search)  │         │   (LLM)   │
-    │           │         │           │
-    │ 3,107     │         │ llama-3.3 │
-    │ vectors   │         │ 70b-ver   │
-    └───────────┘         └───────────┘
-         │
-    ┌────▼──────────────┐
-    │ 📄 PDF Documents  │
-    │ (1,127 pages)     │
-    └───────────────────┘
-```
+This distinction is important when interpreting the output.
 
----
+Grounded Answering
+The RAG prompt instructs the model to:
 
-## 🔧 Configuration
+Use only the retrieved document context.
 
-### Environment Variables
+Avoid inventing facts.
 
-```env
-# 🔑 API Configuration
-GROQ_API_KEY=gsk_your_key_here
-GROQ_MODEL=llama-3.3-70b-versatile
+Avoid using outside knowledge.
 
-# 🌐 Server Configuration
-API_HOST=127.0.0.1
-API_PORT=8000
+Return a "not found" response when the answer cannot be supported by the retrieved context.
 
-# 🧠 Embedding Model
-EMBEDDING_MODEL=all-MiniLM-L6-v2
+For example:
 
-# 📊 Search Parameters
-TOP_K_CHUNKS=3
-```
+Question:
+What is the price of iPhone 17?
 
-### Chunk Size Tuning
+Answer:
+I could not find the answer in the provided documents.
+This demonstrates the system's document-grounding behavior.
 
-Edit `src/splitter.py`:
+Example Queries
+Example 1
+What is machine learning?
+Example 2
+What is deep learning?
+Example 3
+What is gradient descent?
+Example 4
+What is backpropagation?
+Example 5 — Out of domain
+What is the price of iPhone 17?
+The system should not fabricate an answer when the information is absent from the indexed documents.
 
-```python
-# Small documents (< 100 pages)
-chunk_size=512, chunk_overlap=100
+Dockerfile
+The backend uses a lightweight Python 3.11 image:
 
-# Medium documents (100-500 pages)
-chunk_size=1000, chunk_overlap=200  # Current ✓
+FROM python:3.11-slim
 
-# Large documents (> 500 pages)
-chunk_size=1500, chunk_overlap=300
-```
+WORKDIR /app
 
----
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-## 🐛 Troubleshooting
+COPY requirements.txt .
 
-### ❌ "Vector database not found"
+RUN pip install --no-cache-dir -r requirements.txt
 
-```bash
-# Solution: Create it first
-python src/vectorstore.py
-```
+COPY src ./src
 
-### ❌ "GROQ_API_KEY not found"
+RUN mkdir -p /app/data/raw /app/data/chroma_db
 
-```bash
-# 1. Create .env file
-cp .env.example .env
+EXPOSE 8000
 
-# 2. Add your API key
-GROQ_API_KEY=your_key_here
+CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+The local data/ directory is mounted into the container so the PDF and ChromaDB data can be persisted outside the container.
 
-# 3. Restart server
-```
+Configuration
+Important configuration values are defined in the project source files.
 
-### ❌ "Port 8000 already in use"
+Typical environment configuration:
 
-```bash
-# Change port in main.py
-uvicorn.run(app, host="127.0.0.1", port=8001)
-```
+GROQ_API_KEY=your_groq_api_key
+Keep secrets outside source control.
 
-### ❌ "Slow responses"
+Recommended .gitignore entries:
 
-```python
-# Reduce chunks retrieved
-{"question": "...", "top_k": 2}  # Instead of 3
-```
+.env
+*.pdf
+__pycache__/
+*.pyc
+data/chroma_db/
+Troubleshooting
+ImportError: attempted relative import with no known parent package
+Run package modules with:
 
-**[Full Troubleshooting Guide →](./TROUBLESHOOTING.md)**
+python -m src.rag_pipeline
+instead of:
 
----
+python src/rag_pipeline.py
+ModuleNotFoundError: No module named 'loader'
+Inside package modules, use relative imports:
 
-## ❓ FAQ
+from .loader import load_pdfs
+Run the module from the project root:
 
-### Q: Can I use a different LLM?
-**A:** Yes! Edit `.env`:
-```
-GROQ_MODEL=mixtral-8x7b-32768
-```
+python -m src.splitter
+ImportError: cannot import name 'create_bm25'
+Make sure the function name used by the caller matches the actual function:
 
-### Q: How many documents can I add?
-**A:** Unlimited! FAISS scales efficiently to millions.
+from .bm25_retriever import create_bm25_retriever
+and:
 
-### Q: Is my data private?
-**A:** Yes! Runs locally. Only API calls go to Groq.
+bm25 = create_bm25_retriever(chunks)
+'tuple' object has no attribute 'get_scores'
+create_bm25_retriever() must return the BM25 object expected by hybrid_search.py.
 
-### Q: Can I deploy to production?
-**A:** Yes! See [Deployment Guide](./DEPLOYMENT.md)
+If it returns a tuple such as:
 
-### Q: How do I add more PDFs?
-**A:** Drop them in `data/raw/` and run `python src/vectorstore.py`
+bm25, tokenized_corpus
+then pass the BM25 object rather than the entire tuple.
 
-**[More FAQ →](./FAQ.md)**
+Docker cannot find PDFs
+Make sure the host has:
 
----
+data/
+└── raw/
+    ├── Machine_Learning.pdf
+    └── Deep_Learning.pdf
+Run Docker with the data volume mounted:
 
-## 🚀 Deployment
+docker run --env-file .env -p 8000:8000 -v "%cd%\data:/app/data" hybrid-rag-ai
+Streamlit cannot connect to FastAPI
+Make sure the backend is running first:
 
-### Docker (Easiest)
+http://localhost:8000/docs
+Then start:
 
-```bash
-# Build image
-docker build -t rag-api .
+streamlit run frontend/ui.py
+The frontend should call:
 
-# Run container
-docker run -p 8000:8000 \
-  -e GROQ_API_KEY=your_key \
-  rag-api
-```
+http://127.0.0.1:8000/ask
+Development Workflow
+1. Add / update documents
+        ↓
+2. Run ingestion and indexing
+        ↓
+3. Test RAG pipeline
+        ↓
+4. Test FastAPI /docs
+        ↓
+5. Test Streamlit frontend
+        ↓
+6. Build Docker image
+        ↓
+7. Run Docker container
+        ↓
+8. Commit changes
+        ↓
+9. Push to GitHub
+        ↓
+10. Deploy
+Roadmap
+PDF ingestion
 
-### Heroku (Free)
+Recursive text chunking
 
-```bash
-git push heroku main
-```
+Embedding generation
 
-### AWS Lambda (Serverless)
+ChromaDB vector storage
 
-```bash
-serverless deploy
-```
+BM25 keyword retrieval
 
-### Cloud Platforms
-- [🟦 Heroku](https://heroku.com)
-- [🟨 Vercel](https://vercel.com)
-- [🟦 AWS](https://aws.amazon.com)
-- [☁️ Google Cloud](https://cloud.google.com)
-- [🟦 Azure](https://azure.microsoft.com)
+Hybrid retrieval
 
-**[Full Deployment Guide →](./DEPLOYMENT.md)**
+Reciprocal Rank Fusion
 
----
+Confidence scoring
 
-## 🤝 Contributing
+Groq LLM integration
 
-### Want to Help? 🙋
+FastAPI REST API
 
-We'd love your contributions! Whether it's:
+Swagger documentation
 
-- 🐛 Bug fixes
-- ✨ New features
-- 📚 Documentation
-- 💡 Ideas
-- 🎨 UI improvements
+Docker backend
 
-### How to Contribute
+Streamlit frontend
 
-```bash
-# 1. Fork the repo
-# 2. Create feature branch
-git checkout -b feature/amazing-thing
+Docker Compose for frontend + backend
 
-# 3. Make changes
-# 4. Commit
-git commit -m "Add: Amazing feature"
+Automated RAG evaluation
 
-# 5. Push
-git push origin feature/amazing-thing
+Retrieval metrics such as Recall@K / MRR
 
-# 6. Open Pull Request
-```
+Production cloud deployment
 
-**[Contribution Guidelines →](./CONTRIBUTING.md)**
+Monitoring and observability
 
----
+Authentication and rate limiting
 
-## 📈 Roadmap
+Why This Project Matters
+This project demonstrates an end-to-end AI Engineering / RAG workflow, rather than only an LLM API call.
 
-- [x] ✅ Core RAG pipeline
-- [x] ✅ FAISS vector search
-- [x] ✅ Groq LLM integration
-- [x] ✅ FastAPI endpoints
-- [ ] 🔄 Web UI (Streamlit)
-- [ ] 🔄 Multi-language support
-- [ ] 🔄 Hybrid search (keyword + semantic)
-- [ ] 🔄 Query caching
-- [ ] 🔄 Analytics dashboard
-- [ ] 🔄 Fine-tuned models
+It covers:
 
-**[Full Roadmap →](./ROADMAP.md)**
+Document ingestion
 
----
+Text preprocessing
 
-## 📚 Resources
+Embedding generation
 
-### Learning Materials
-- [RAG Explained](https://en.wikipedia.org/wiki/Retrieval-augmented_generation)
-- [FAISS Tutorial](https://github.com/facebookresearch/faiss/wiki)
-- [LangChain Docs](https://python.langchain.com)
-- [Groq Documentation](https://console.groq.com/docs)
+Vector databases
 
-### Tools & Libraries
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [LangChain](https://langchain.com/)
-- [FAISS](https://github.com/facebookresearch/faiss)
-- [HuggingFace](https://huggingface.co/)
+Information retrieval
 
----
+Keyword search
 
-## 📊 Project Stats
+Hybrid retrieval
 
-```
-📈 Downloads:     Coming soon
-⭐ GitHub Stars:   ⭐⭐⭐⭐⭐ (Your help!)
-🤝 Contributors:  You?
-📝 Lines of Code: ~2,500
-🧪 Test Coverage: 95%+
-📦 Dependencies:  15 core
-```
+Ranking fusion
 
----
+Context construction
 
-## 🎓 What You'll Learn
+LLM inference
 
-By exploring this project, you'll understand:
+Confidence estimation
 
-- ✅ How RAG systems work
-- ✅ Vector databases (FAISS)
-- ✅ Semantic search
-- ✅ LLM integration
-- ✅ REST API design
-- ✅ Document processing
-- ✅ Production deployment
+REST API development
 
----
+Frontend development
 
-## 💬 Community
+Docker containerization
 
-### Join Us!
+Git/GitHub workflow
 
-- **GitHub Issues:** [Report bugs](https://github.com/YOUR_USERNAME/rag-hybrid-search/issues)
-- **Discussions:** [Ask questions](https://github.com/YOUR_USERNAME/rag-hybrid-search/discussions)
-- **Twitter:** [@YourHandle](https://twitter.com/yourhandle)
-- **Email:** your.email@example.com
+Author
+Vishnu T Pillai
 
-### Show Your Support
+<p> <a href="https://github.com/Vishnutpillai">GitHub</a> · <a href="https://www.linkedin.com/in/vishnu-t-pillai">LinkedIn</a> </p>
 
-- ⭐ **Star this repo**
-- 🍴 **Fork it**
-- 🐛 **Report issues**
-- 💡 **Share ideas**
-- 🤝 **Contribute**
+License
+This project is available under the MIT License.
 
----
+<p align="center"> Built with Python, ChromaDB, BM25, FastAPI, Streamlit, Docker, and Groq. </p>
 
-## 📄 License
-
-This project is licensed under the **MIT License** - see [LICENSE](./LICENSE) file.
-
-Free to use. Free to modify. Free to distribute.
-
----
-
-## 🙏 Special Thanks
-
-Built with ❤️ using:
-
-- **[LangChain](https://langchain.com/)** - Document processing
-- **[FAISS](https://github.com/facebookresearch/faiss)** - Vector search
-- **[Groq](https://groq.com/)** - Fast LLM inference
-- **[FastAPI](https://fastapi.tiangolo.com/)** - Modern web framework
-- **[HuggingFace](https://huggingface.co/)** - AI models
-
----
-
-<div align="center">
-
-## 🎯 Ready to Get Started?
-
-### [⬇️ Clone Now](https://github.com/YOUR_USERNAME/rag-hybrid-search) | [📖 Read Docs](./README.md) | [🚀 Deploy](./DEPLOYMENT.md)
-
----
-
-### 🌟 If this helped you, please give us a star! ⭐
-
-```
-git clone https://github.com/YOUR_USERNAME/rag-hybrid-search.git
-cd rag-hybrid-search
-pip install -r requirements.txt
-python src/vectorstore.py
-python src/main.py
-```
-
-### Then visit: **http://localhost:8000/docs**
-
----
-
-**Made with ❤️ by [Your Name]**
-
-[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/yourhandle)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/yourprofile)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/YOUR_USERNAME)
-
-Last updated: 2024 | License: MIT | Status: Production Ready ✅
-
-</div>
