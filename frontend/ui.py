@@ -11,6 +11,7 @@ st.set_page_config(
 
 DEFAULT_API_URL = os.getenv("RAG_API_URL", "http://localhost:8000")
 
+
 st.markdown("""
 <style>
 .stApp {

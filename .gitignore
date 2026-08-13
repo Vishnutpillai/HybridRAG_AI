@@ -1,5 +1,29 @@
+# Environment
 .env
-*.pdf
+.env.*
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# PDFs / raw documents
+*.pdf
+data/raw/
+
+# ChromaDB
 data/chroma_db/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

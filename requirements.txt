@@ -12,5 +12,3 @@ rank-bm25
 fastapi
 uvicorn 
 python-multipart
-streamlit 
-requests
