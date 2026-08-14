@@ -1,7 +1,6 @@
 from pathlib import Path
 from langchain_community.document_loaders import PyMuPDFLoader
 
-
 def load_pdfs(pdf_paths: list[str]):
     """
     Load multiple PDF files and return a list of LangChain Documents.

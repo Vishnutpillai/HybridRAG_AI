@@ -1,6 +1,5 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-
 def split_documents(documents, min_chunk_size=100):
     """
     Split documents into chunks with filtering and error handling.

@@ -10,20 +10,17 @@ from groq import Groq
 
 load_dotenv()
 
-
 # ============================================================
 # READ GROQ API KEY
 # ============================================================
 
 api_key = os.getenv("GROQ_API_KEY")
 
-
 if not api_key:
     raise ValueError(
         "❌ GROQ_API_KEY not found! "
         "Please add it to your .env file."
     )
-
 
 # ============================================================
 # CREATE GROQ CLIENT
@@ -32,7 +29,6 @@ if not api_key:
 client = Groq(
     api_key=api_key
 )
-
 
 # ============================================================
 # ASK GROQ
@@ -61,7 +57,6 @@ def ask_groq(prompt: str) -> str:
     )
 
     return response.choices[0].message.content
-
 
 # ============================================================
 # TEST GROQ
