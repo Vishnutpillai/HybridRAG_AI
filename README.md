@@ -14,6 +14,12 @@
 
 **Hybrid RAG AI Assistant** is an end-to-end document question-answering system engineered for accuracy and transparency. It goes beyond traditional RAG by combining multiple retrieval strategies to ensure comprehensive and grounded answers directly from your uploaded PDF documents.
 
+## 🖥️ Streamlit Application
+
+The Streamlit interface allows users to ask questions and view grounded answers, retrieval quality, confidence scores, and retrieved document information.
+
+![Streamlit Application](images/streamlit-ui.png)
+
 ### Why Choose Hybrid RAG?
 
 Instead of relying on a single retrieval method, this system intelligently combines:
@@ -468,12 +474,6 @@ streamlit run frontend/ui.py
 
 # Frontend runs on http://localhost:8501
 ```
-
-## 🖥️ Streamlit Application
-
-The Streamlit interface allows users to ask questions and view grounded answers, retrieval quality, confidence scores, and retrieved document information.
-
-![Streamlit Application](images/streamlit-ui.png)
 
 ---
 
