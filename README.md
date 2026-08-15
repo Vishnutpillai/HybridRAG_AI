@@ -135,6 +135,11 @@ rag-hybrid-search/
 ├── 📄 README.md
 └── 📄 LICENSE
 ```
+## 🏗️ System Architecture
+
+The system follows a production-style Hybrid RAG architecture combining semantic vector search, BM25 keyword retrieval, Reciprocal Rank Fusion (RRF), and Groq LLM generation.
+
+![Hybrid RAG Architecture](images/architecture.png)
 
 ---
 
@@ -444,6 +449,12 @@ uvicorn src.api:app --reload
 
 # Backend runs on http://localhost:8000
 ```
+## 🔌 FastAPI Backend
+
+The backend provides REST API endpoints for health checks, document ingestion, document listing, and RAG-based question answering.
+
+![FastAPI Swagger UI](images/swagger-api.png)
+
 
 ### Frontend Setup
 
@@ -457,6 +468,12 @@ streamlit run frontend/ui.py
 
 # Frontend runs on http://localhost:8501
 ```
+
+## 🖥️ Streamlit Application
+
+The Streamlit interface allows users to ask questions and view grounded answers, retrieval quality, confidence scores, and retrieved document information.
+
+![Streamlit Application](images/streamlit-ui.png)
 
 ---
 
