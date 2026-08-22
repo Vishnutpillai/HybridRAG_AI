@@ -12,15 +12,15 @@ def load_pdfs(pdf_paths: list[str]):
         pdf_path = Path(pdf_path)
 
         if not pdf_path.exists():
-            print(f"❌ File not found: {pdf_path}")
+            print(f" File not found: {pdf_path}")
             continue
 
-        print(f"📄 Loading: {pdf_path.name}")
+        print(f" Loading: {pdf_path.name}")
 
         loader = PyMuPDFLoader(str(pdf_path))
         documents = loader.load()
 
-        print(f"✅ Pages loaded: {len(documents)}")
+        print(f" Pages loaded: {len(documents)}")
 
         all_documents.extend(documents)
 

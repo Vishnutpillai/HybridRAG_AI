@@ -92,12 +92,12 @@ def initialize_rag():
     # LOAD DOCUMENTS
     # --------------------------------------------------------
 
-    print("\n📚 Loading documents...")
+    print("\n Loading documents...")
 
     documents = load_pdfs(PDF_PATHS)
 
     print(
-        f"✅ Total pages loaded: {len(documents)}"
+        f" Total pages loaded: {len(documents)}"
     )
 
     if not documents:
@@ -109,7 +109,7 @@ def initialize_rag():
     # SPLIT DOCUMENTS
     # --------------------------------------------------------
 
-    print("\n✂️ Splitting documents...")
+    print("\n Splitting documents...")
 
     chunks = split_documents(
         documents,
@@ -117,7 +117,7 @@ def initialize_rag():
     )
 
     print(
-        f"✅ Total chunks: {len(chunks)}"
+        f" Total chunks: {len(chunks)}"
     )
 
     if not chunks:
@@ -129,17 +129,17 @@ def initialize_rag():
     # EMBEDDING MODEL
     # --------------------------------------------------------
 
-    print("\n🧠 Loading embedding model...")
+    print("\n Loading embedding model...")
 
     embedding_model = create_embedding_model()
 
-    print("✅ Embedding model loaded!")
+    print(" Embedding model loaded!")
 
     # --------------------------------------------------------
     # CHROMADB
     # --------------------------------------------------------
 
-    print("\n🗄️ Loading ChromaDB...")
+    print("\n Loading ChromaDB...")
 
     vector_store = Chroma(
         collection_name=COLLECTION_NAME,
@@ -147,7 +147,7 @@ def initialize_rag():
         persist_directory=str(CHROMA_DIR),
     )
 
-    print("✅ ChromaDB loaded!")
+    print(" ChromaDB loaded!")
 
     # --------------------------------------------------------
     # BM25
@@ -157,10 +157,10 @@ def initialize_rag():
 
     bm25 = create_bm25_retriever(chunks)
 
-    print("✅ BM25 index created!")
+    print(" BM25 index created!")
 
     print("\n" + "=" * 60)
-    print("✅ RAG SYSTEM READY")
+    print(" RAG SYSTEM READY")
     print("=" * 60)
 
 
@@ -186,7 +186,7 @@ def startup_event():
 
     except Exception as e:
 
-        print("\n❌ RAG INITIALIZATION FAILED")
+        print("\n RAG INITIALIZATION FAILED")
         print(f"Error: {e}")
 
         raise
@@ -534,7 +534,7 @@ async def ingest_document(
         destination.write_bytes(content)
 
         print(
-            f"\n📄 New document uploaded: "
+            f"\n New document uploaded: "
             f"{safe_filename}"
         )
 
@@ -592,7 +592,7 @@ async def ingest_document(
         )
 
         print(
-            f"✅ Indexed {len(new_chunks)} new chunks"
+            f" Indexed {len(new_chunks)} new chunks"
         )
 
         return {

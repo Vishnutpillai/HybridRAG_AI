@@ -16,7 +16,7 @@ def create_embedding_model():
         384-dimensional embedding vectors
     """
 
-    print("\n🔄 Loading embedding model...")
+    print("\n Loading embedding model...")
 
     embedding_model = HuggingFaceEmbeddings(
         model_name="BAAI/bge-small-en-v1.5",
@@ -28,7 +28,7 @@ def create_embedding_model():
         },
     )
 
-    print("✅ Embedding model loaded successfully!")
+    print(" Embedding model loaded successfully!")
 
     return embedding_model
 
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
         documents = load_pdfs(pdf_paths)
 
-        print(f"\n📄 Total pages loaded: {len(documents)}")
+        print(f"\n Total pages loaded: {len(documents)}")
 
         # ====================================================
         # STEP 2: SPLIT DOCUMENTS
@@ -78,7 +78,7 @@ if __name__ == "__main__":
             min_chunk_size=100
         )
 
-        print(f"\n📝 Total chunks: {len(chunks)}")
+        print(f"\n Total chunks: {len(chunks)}")
 
         # ====================================================
         # STEP 3: CREATE EMBEDDING MODEL
@@ -101,17 +101,17 @@ if __name__ == "__main__":
         first_chunk = chunks[0]
 
         print(
-            f"\n📌 Chunk length: "
+            f"\n Chunk length: "
             f"{len(first_chunk.page_content)} characters"
         )
 
         print(
-            f"📄 Source: "
+            f" Source: "
             f"{first_chunk.metadata.get('source')}"
         )
 
         print(
-            f"📖 Page: "
+            f" Page: "
             f"{first_chunk.metadata.get('page')}"
         )
 
@@ -136,16 +136,16 @@ if __name__ == "__main__":
         print("=" * 60)
 
         print(
-            f"\n🔢 Vector type: "
+            f"\n Vector type: "
             f"{type(vector)}"
         )
 
         print(
-            f"📐 Vector dimensions: "
+            f" Vector dimensions: "
             f"{len(vector)}"
         )
 
-        print("\n🔢 First 10 vector values:")
+        print("\n First 10 vector values:")
 
         for i, value in enumerate(vector[:10], start=1):
             print(f"  {i}. {value:.6f}")
@@ -207,7 +207,7 @@ if __name__ == "__main__":
         if all(checks.values()):
 
             print("\n" + "=" * 60)
-            print("✅ PHASE 4: EMBEDDING TEST PASSED")
+            print(" PHASE 4: EMBEDDING TEST PASSED")
             print("=" * 60)
 
             print(
@@ -218,13 +218,13 @@ if __name__ == "__main__":
         else:
 
             print("\n" + "=" * 60)
-            print("❌ PHASE 4: EMBEDDING TEST FAILED")
+            print(" PHASE 4: EMBEDDING TEST FAILED")
             print("=" * 60)
 
     except Exception as e:
 
         print("\n" + "=" * 60)
-        print("❌ EMBEDDING ERROR")
+        print(" EMBEDDING ERROR")
         print("=" * 60)
 
         print(f"\nError: {str(e)}")

@@ -18,7 +18,7 @@ api_key = os.getenv("GROQ_API_KEY")
 
 if not api_key:
     raise ValueError(
-        "❌ GROQ_API_KEY not found! "
+        " GROQ_API_KEY not found! "
         "Please add it to your .env file."
     )
 
@@ -41,7 +41,7 @@ def ask_groq(prompt: str) -> str:
 
     if not prompt.strip():
         raise ValueError(
-            "❌ Prompt cannot be empty!"
+            " Prompt cannot be empty!"
         )
 
     response = client.chat.completions.create(
@@ -70,24 +70,24 @@ if __name__ == "__main__":
 
     question = "What is machine learning?"
 
-    print(f"\n❓ Question: {question}")
+    print(f"\n Question: {question}")
 
     try:
 
         answer = ask_groq(question)
 
-        print("\n🤖 Groq Response:")
+        print("\n Groq Response:")
         print("-" * 60)
         print(answer)
 
         print("\n" + "=" * 60)
-        print("✅ GROQ TEST PASSED")
+        print(" GROQ TEST PASSED")
         print("=" * 60)
 
     except Exception as e:
 
         print("\n" + "=" * 60)
-        print("❌ GROQ TEST FAILED")
+        print(" GROQ TEST FAILED")
         print("=" * 60)
 
         print(f"\nError: {str(e)}")

@@ -494,11 +494,11 @@ if __name__ == "__main__":
         f"{confidence['overall_confidence']:.2f}"
     )
 
-    print("\n⚠️ Note:")
+    print("\n Note:")
     print(
         "These are heuristic confidence scores, "
         "not calibrated probabilities."
     )
 
-    print("\n✅ Confidence module working!")
+    print("\n Confidence module working!")
     

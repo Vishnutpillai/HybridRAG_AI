@@ -17,9 +17,9 @@ def split_documents(documents, min_chunk_size=100):
 
     # Validate input
     if not documents:
-        raise ValueError("❌ No documents provided!")
+        raise ValueError(" No documents provided!")
 
-    print(f"\n📚 Processing {len(documents)} documents...")
+    print(f"\n Processing {len(documents)} documents...")
 
     try:
         # Create text splitter
@@ -33,9 +33,9 @@ def split_documents(documents, min_chunk_size=100):
         chunks = text_splitter.split_documents(documents)
 
         if not chunks:
-            raise ValueError("❌ Splitting produced no chunks!")
+            raise ValueError(" Splitting produced no chunks!")
 
-        print(f"✅ Splitting created {len(chunks)} chunks")
+        print(f" Splitting created {len(chunks)} chunks")
 
         # Filter small/empty chunks
         original_count = len(chunks)
@@ -50,16 +50,16 @@ def split_documents(documents, min_chunk_size=100):
 
         if not chunks:
             raise ValueError(
-                f"❌ All chunks filtered out "
+                f" All chunks filtered out "
                 f"(min_size={min_chunk_size})"
             )
 
-        print(f"✅ Filtering removed {removed} small chunks")
+        print(f" Filtering removed {removed} small chunks")
 
         return chunks
 
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f" Error: {str(e)}")
         raise
 
 
@@ -67,7 +67,7 @@ def analyze_chunks(chunks):
     """Analyze and validate chunk quality."""
 
     if not chunks:
-        print("❌ No chunks to analyze")
+        print(" No chunks to analyze")
         return False
 
     chunk_lengths = [
@@ -93,7 +93,7 @@ def analyze_chunks(chunks):
     )
 
     # Size distribution
-    print("\n📊 SIZE DISTRIBUTION:")
+    print("\n SIZE DISTRIBUTION:")
 
     ranges = [
         (0, 100),
@@ -121,7 +121,7 @@ def analyze_chunks(chunks):
             )
 
     # Source breakdown
-    print("\n📋 SOURCE BREAKDOWN:")
+    print("\n SOURCE BREAKDOWN:")
 
     sources = {}
 
@@ -140,7 +140,7 @@ def analyze_chunks(chunks):
         print(f"  {filename}: {count} chunks")
 
     # Validation
-    print("\n✅ VALIDATION:")
+    print("\n VALIDATION:")
 
     checks = {
         "Min size >= 100":
@@ -214,7 +214,7 @@ if __name__ == "__main__":
         print(chunks[0].page_content[:500])
 
         print(
-            "\n📄 Metadata:",
+            "\n Metadata:",
             chunks[0].metadata
         )
 
@@ -225,25 +225,25 @@ if __name__ == "__main__":
         if is_valid:
 
             print(
-                "\n✅ Chunking phase completed!"
+                "\n Chunking phase completed!"
             )
 
             print(
-                "✅ Ready for embeddings and "
+                " Ready for embeddings and "
                 "vector storage!"
             )
 
         else:
 
             print(
-                "\n⚠️ Review chunk quality "
+                "\n Review chunk quality "
                 "before proceeding."
             )
 
     except Exception as e:
 
         print(
-            f"\n❌ Fatal error: {str(e)}"
+            f"\n Fatal error: {str(e)}"
         )
 
         exit(1)

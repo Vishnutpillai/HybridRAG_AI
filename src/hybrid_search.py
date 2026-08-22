@@ -281,7 +281,7 @@ def hybrid_search(
     print("HYBRID SEARCH")
     print("=" * 60)
 
-    print(f"\n❓ Query: {query}")
+    print(f"\n Query: {query}")
 
     # --------------------------------------------------------
     # Vector retrieval
@@ -294,7 +294,7 @@ def hybrid_search(
     )
 
     print(
-        f"\n🔵 Vector results: "
+        f"\n Vector results: "
         f"{len(vector_results)}"
     )
 
@@ -310,7 +310,7 @@ def hybrid_search(
     )
 
     print(
-        f"🟢 BM25 results: "
+        f" BM25 results: "
         f"{len(bm25_results)}"
     )
 
@@ -326,7 +326,7 @@ def hybrid_search(
     final_results = fused_results[:top_k]
 
     print(
-        f"🟣 Hybrid results: "
+        f" Hybrid results: "
         f"{len(final_results)}"
     )
 
@@ -359,21 +359,21 @@ def display_results(results):
         print("-" * 60)
 
         print(
-            f"\n🔵 Dense Score: "
+            f"\n Dense Score: "
             f"{dense_score:.6f}"
         )
 
         print(
-            f"🟢 BM25 Score: "
+            f" BM25 Score: "
             f"{bm25_score:.6f}"
         )
 
         print(
-            f"🟣 RRF Score: "
+            f" RRF Score: "
             f"{rrf_score:.6f}"
         )
 
-        print("\n📄 Source:")
+        print("\n Source:")
 
         print(
             document.metadata.get(
@@ -382,7 +382,7 @@ def display_results(results):
             )
         )
 
-        print("\n📖 Page:")
+        print("\n Page:")
 
         print(
             document.metadata.get(
@@ -391,7 +391,7 @@ def display_results(results):
             )
         )
 
-        print("\n📝 Content:")
+        print("\n Content:")
 
         print(
             document.page_content[:500]
@@ -494,7 +494,7 @@ if __name__ == "__main__":
         )
 
         print(
-            f"\n📄 Total pages: "
+            f"\n Total pages: "
             f"{len(documents)}"
         )
 
@@ -512,7 +512,7 @@ if __name__ == "__main__":
         )
 
         print(
-            f"\n📝 Total chunks: "
+            f"\n Total chunks: "
             f"{len(chunks)}"
         )
 
@@ -543,7 +543,7 @@ if __name__ == "__main__":
         )
 
         print(
-            "✅ ChromaDB loaded successfully!"
+            " ChromaDB loaded successfully!"
         )
 
         # ====================================================
@@ -557,7 +557,7 @@ if __name__ == "__main__":
         bm25 = create_bm25(chunks)
 
         print(
-            "✅ BM25 index created!"
+            " BM25 index created!"
         )
 
         # ====================================================
@@ -614,12 +614,12 @@ if __name__ == "__main__":
 
             print("\n" + "=" * 60)
             print(
-                "✅ PHASE 7: HYBRID SEARCH PASSED"
+                " PHASE 7: HYBRID SEARCH PASSED"
             )
             print("=" * 60)
 
             print(
-                "\n🎉 ChromaDB + BM25 "
+                "\n ChromaDB + BM25 "
                 "hybrid retrieval is working!"
             )
 
@@ -627,14 +627,14 @@ if __name__ == "__main__":
 
             print("\n" + "=" * 60)
             print(
-                "❌ PHASE 7: VALIDATION FAILED"
+                " PHASE 7: VALIDATION FAILED"
             )
             print("=" * 60)
 
     except Exception as e:
 
         print("\n" + "=" * 60)
-        print("❌ HYBRID SEARCH ERROR")
+        print(" HYBRID SEARCH ERROR")
         print("=" * 60)
 
         print(

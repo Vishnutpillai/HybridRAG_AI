@@ -32,9 +32,9 @@ def create_vector_store(chunks, embedding_model):
     """
 
     if not chunks:
-        raise ValueError("❌ No chunks provided!")
+        raise ValueError(" No chunks provided!")
 
-    print("\n🔄 Creating ChromaDB vector store...")
+    print("\n Creating ChromaDB vector store...")
 
     # Create database directory
     Path(CHROMA_DIR).mkdir(
@@ -50,10 +50,10 @@ def create_vector_store(chunks, embedding_model):
         persist_directory=CHROMA_DIR,
     )
 
-    print("✅ ChromaDB vector store created!")
-    print(f"📦 Collection: {COLLECTION_NAME}")
-    print(f"💾 Database: {CHROMA_DIR}")
-    print(f"📄 Documents stored: {len(chunks)}")
+    print(" ChromaDB vector store created!")
+    print(f" Collection: {COLLECTION_NAME}")
+    print(f" Database: {CHROMA_DIR}")
+    print(f" Documents stored: {len(chunks)}")
 
     return vector_store
 
@@ -79,14 +79,14 @@ def test_similarity_search(vector_store, query, k=5):
     print("VECTOR SEARCH TEST")
     print("=" * 60)
 
-    print(f"\n❓ Query: {query}")
+    print(f"\n Query: {query}")
 
     results = vector_store.similarity_search(
         query,
         k=k
     )
 
-    print(f"\n🔎 Retrieved documents: {len(results)}")
+    print(f"\n Retrieved documents: {len(results)}")
 
     for index, document in enumerate(results, start=1):
 
@@ -94,7 +94,7 @@ def test_similarity_search(vector_store, query, k=5):
         print(f"RESULT {index}")
         print("-" * 60)
 
-        print("\n📄 Source:")
+        print("\n Source:")
         print(
             document.metadata.get(
                 "source",
@@ -102,7 +102,7 @@ def test_similarity_search(vector_store, query, k=5):
             )
         )
 
-        print("\n📖 Page:")
+        print("\n Page:")
         print(
             document.metadata.get(
                 "page",
@@ -110,7 +110,7 @@ def test_similarity_search(vector_store, query, k=5):
             )
         )
 
-        print("\n📝 Content:")
+        print("\n Content:")
         print(
             document.page_content[:500]
         )
@@ -158,7 +158,7 @@ if __name__ == "__main__":
         documents = load_pdfs(pdf_paths)
 
         print(
-            f"\n📄 Total pages loaded: "
+            f"\n Total pages loaded: "
             f"{len(documents)}"
         )
 
@@ -176,7 +176,7 @@ if __name__ == "__main__":
         )
 
         print(
-            f"\n📝 Total chunks: "
+            f"\n Total chunks: "
             f"{len(chunks)}"
         )
 
@@ -216,7 +216,7 @@ if __name__ == "__main__":
         )
 
         print(
-            f"\n📦 Documents in ChromaDB: "
+            f"\n Documents in ChromaDB: "
             f"{stored_count}"
         )
 
@@ -277,15 +277,15 @@ if __name__ == "__main__":
         if all(checks.values()):
 
             print("\n" + "=" * 60)
-            print("✅ PHASE 5: VECTOR DATABASE PASSED")
+            print(" PHASE 5: VECTOR DATABASE PASSED")
             print("=" * 60)
 
             print(
-                "\n🎉 ChromaDB is working correctly!"
+                "\n ChromaDB is working correctly!"
             )
 
             print(
-                f"📦 Stored {stored_count} chunks"
+                f" Stored {stored_count} chunks"
             )
 
             print(
@@ -295,13 +295,13 @@ if __name__ == "__main__":
         else:
 
             print("\n" + "=" * 60)
-            print("❌ PHASE 5: VALIDATION FAILED")
+            print(" PHASE 5: VALIDATION FAILED")
             print("=" * 60)
 
     except Exception as e:
 
         print("\n" + "=" * 60)
-        print("❌ VECTOR STORE ERROR")
+        print(" VECTOR STORE ERROR")
         print("=" * 60)
 
         print(

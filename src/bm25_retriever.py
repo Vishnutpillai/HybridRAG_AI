@@ -50,9 +50,9 @@ def create_bm25_retriever(chunks):
     """
 
     if not chunks:
-        raise ValueError("❌ No chunks provided!")
+        raise ValueError(" No chunks provided!")
 
-    print("\n🔄 Creating BM25 index...")
+    print("\n Creating BM25 index...")
 
     # Extract text from every chunk
     corpus = [
@@ -69,8 +69,8 @@ def create_bm25_retriever(chunks):
     # Create BM25 index
     bm25 = BM25Okapi(tokenized_corpus)
 
-    print("✅ BM25 index created!")
-    print(f"📄 Documents indexed: {len(chunks)}")
+    print(" BM25 index created!")
+    print(f" Documents indexed: {len(chunks)}")
 
     return bm25
 
@@ -99,13 +99,13 @@ def bm25_search(
     """
 
     if not query.strip():
-        raise ValueError("❌ Query cannot be empty!")
+        raise ValueError(" Query cannot be empty!")
 
     print("\n" + "=" * 60)
     print("BM25 SEARCH")
     print("=" * 60)
 
-    print(f"\n❓ Query: {query}")
+    print(f"\n Query: {query}")
 
     # Tokenize query
     tokenized_query = tokenize(query)
@@ -132,7 +132,7 @@ def bm25_search(
         )
 
     print(
-        f"\n🔎 Retrieved documents: "
+        f"\n Retrieved documents: "
         f"{len(results)}"
     )
 
@@ -158,11 +158,11 @@ def display_results(results):
         print("-" * 60)
 
         print(
-            f"\n📊 BM25 Score: "
+            f"\n BM25 Score: "
             f"{score:.4f}"
         )
 
-        print("\n📄 Source:")
+        print("\n Source:")
 
         print(
             document.metadata.get(
@@ -171,7 +171,7 @@ def display_results(results):
             )
         )
 
-        print("\n📖 Page:")
+        print("\n Page:")
 
         print(
             document.metadata.get(
@@ -180,7 +180,7 @@ def display_results(results):
             )
         )
 
-        print("\n📝 Content:")
+        print("\n Content:")
 
         print(
             document.page_content[:500]
@@ -257,7 +257,7 @@ if __name__ == "__main__":
         )
 
         print(
-            f"\n📄 Total pages loaded: "
+            f"\n Total pages loaded: "
             f"{len(documents)}"
         )
 
@@ -275,7 +275,7 @@ if __name__ == "__main__":
         )
 
         print(
-            f"\n📝 Total chunks: "
+            f"\n Total chunks: "
             f"{len(chunks)}"
         )
 
@@ -327,34 +327,34 @@ if __name__ == "__main__":
         if is_valid:
 
             print("\n" + "=" * 60)
-            print("✅ PHASE 6: BM25 RETRIEVAL PASSED")
+            print(" PHASE 6: BM25 RETRIEVAL PASSED")
             print("=" * 60)
 
             print(
-                "\n🎉 BM25 keyword retrieval "
+                "\n BM25 keyword retrieval "
                 "is working correctly!"
             )
 
             print(
-                "📦 Indexed chunks: "
+                " Indexed chunks: "
                 f"{len(chunks)}"
             )
 
             print(
-                "🔎 Retrieved results: "
+                " Retrieved results: "
                 f"{len(results)}"
             )
 
         else:
 
             print("\n" + "=" * 60)
-            print("❌ PHASE 6: BM25 VALIDATION FAILED")
+            print(" PHASE 6: BM25 VALIDATION FAILED")
             print("=" * 60)
 
     except Exception as e:
 
         print("\n" + "=" * 60)
-        print("❌ BM25 ERROR")
+        print(" PHASE 6: BM25 ERROR")
         print("=" * 60)
 
         print(

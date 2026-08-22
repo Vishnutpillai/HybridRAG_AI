@@ -528,45 +528,45 @@ if __name__ == "__main__":
         ):
 
             print(
-                "Documents loaded       ✅"
+                "Documents loaded       "
             )
 
             print(
-                "Chunks created         ✅"
+                "Chunks created         "
             )
 
             print(
-                "ChromaDB search        ✅"
+                "ChromaDB search        "
             )
 
             print(
-                "BM25 search            ✅"
+                "BM25 search            "
             )
 
             print(
-                "Hybrid search          ✅"
+                "Hybrid search          "
             )
 
             print(
-                "Confidence calculation ✅"
+                "Confidence calculation "
             )
 
             print(
-                "Groq generation        ✅"
+                "Groq generation        "
             )
 
             print(
-                "Final answer generated ✅"
+                "Final answer generated "
             )
 
             print(
-                "\n🎉 COMPLETE RAG PIPELINE WORKING!"
+                "\n COMPLETE RAG PIPELINE WORKING!"
             )
 
         else:
 
             print(
-                "❌ RAG pipeline validation failed."
+                " RAG pipeline validation failed."
             )
 
     except Exception as e:
