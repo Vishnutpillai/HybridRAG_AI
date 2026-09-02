@@ -1,238 +1,245 @@
 # ⚡ Hybrid RAG AI Assistant
 
-[![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-latest-red?style=flat-square&logo=streamlit)](https://streamlit.io/)
-[![Docker](https://img.shields.io/badge/Docker-Compose-blue?style=flat-square&logo=docker)](https://www.docker.com/)
-[![ChromaDB](https://img.shields.io/badge/ChromaDB-VectorDB-orange?style=flat-square)](https://www.trychroma.com/)
-[![LangChain](https://img.shields.io/badge/LangChain-Orchestration-1C3C3C?style=flat-square&logo=langchain)](https://www.langchain.com/)
-[![Groq](https://img.shields.io/badge/Groq-LLM_Inference-F55036?style=flat-square)](https://groq.com/)
-[![HuggingFace](https://img.shields.io/badge/🤗-Embeddings-yellow?style=flat-square)](https://huggingface.co/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
+<p align="center">
+  <strong>Hybrid Retrieval • RAG • FastAPI • Streamlit • Groq • Docker</strong>
+</p>
 
-[![Stars](https://img.shields.io/github/stars/Vishnutpillai/rag-hybrid-search?style=flat-square&color=yellow)](https://github.com/Vishnutpillai/rag-hybrid-search/stargazers)
-[![Forks](https://img.shields.io/github/forks/Vishnutpillai/rag-hybrid-search?style=flat-square)](https://github.com/Vishnutpillai/rag-hybrid-search/network/members)
-[![Issues](https://img.shields.io/github/issues/Vishnutpillai/rag-hybrid-search?style=flat-square)](https://github.com/Vishnutpillai/rag-hybrid-search/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/Vishnutpillai/rag-hybrid-search?style=flat-square)](https://github.com/Vishnutpillai/rag-hybrid-search/commits/main)
-[![Repo Size](https://img.shields.io/github/repo-size/Vishnutpillai/rag-hybrid-search?style=flat-square)](https://github.com/Vishnutpillai/rag-hybrid-search)
+<p align="center">
+An end-to-end Retrieval-Augmented Generation application combining semantic vector search,
+BM25 keyword retrieval, Reciprocal Rank Fusion (RRF), confidence scoring, and Groq-powered
+LLM generation for grounded document question answering.
+</p>
 
-> A production-ready Retrieval-Augmented Generation (RAG) application combining **Hybrid Search**, **Vector Embeddings**, **BM25 Keyword Matching**, **Confidence Scoring**, and **Groq LLMs** for intelligent document question-answering.
+<p align="center">
+<img src="https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python">
+<img src="https://img.shields.io/badge/FastAPI-REST_API-green?style=flat-square&logo=fastapi">
+<img src="https://img.shields.io/badge/Streamlit-Frontend-red?style=flat-square&logo=streamlit">
+<img src="https://img.shields.io/badge/Docker-Compose-blue?style=flat-square&logo=docker">
+<img src="https://img.shields.io/badge/LLM-Groq-orange?style=flat-square">
+<img src="https://img.shields.io/badge/License-MIT-green?style=flat-square">
+</p>
 
 ---
 
-## 🎯 Overview
+## 📌 Overview
 
-**Hybrid RAG AI Assistant** is an end-to-end document question-answering system engineered for accuracy and transparency. It goes beyond traditional RAG by combining multiple retrieval strategies to ensure comprehensive and grounded answers directly from your uploaded PDF documents.
+**Hybrid RAG AI Assistant** is a document question-answering system designed to improve
+retrieval quality by combining:
 
-## 🖥️ Streamlit Application
+- Semantic vector search
+- BM25 keyword retrieval
+- Reciprocal Rank Fusion (RRF)
+- Retrieval and evidence confidence scoring
+- Groq LLM inference
+- FastAPI REST services
+- Streamlit interactive UI
+- Docker Compose multi-service deployment
 
-The Streamlit interface allows users to ask questions and view grounded answers, retrieval quality, confidence scores, and retrieved document information.
+The core workflow is:
 
-![Streamlit Application](images/streamlit-ui.png)
-
-### Why Choose Hybrid RAG?
-
-Instead of relying on a single retrieval method, this system intelligently combines:
-
-| Component | Benefit |
-|-----------|---------|
-| 🔵 **Semantic Vector Search** | Captures meaning-based similarity across documents |
-| 🟢 **BM25 Keyword Search** | Excels at exact-term and technical terminology matching |
-| 🟣 **Hybrid RRF Fusion** | Combines both signals for more robust rankings |
-| 📊 **Confidence Scoring** | Provides transparency into answer quality and evidence strength |
-| 🤖 **Groq LLM Integration** | Fast, efficient grounded answer generation |
+> **Retrieve relevant evidence first, then generate an answer grounded in that evidence.**
 
 ---
 
 ## ✨ Key Features
 
-```
-📄 PDF Ingestion              Upload and index PDFs through REST API
-✂️  Recursive Chunking         Intelligent overlapping chunks with configurable sizes
-🔎 Vector Search (ChromaDB)   Semantic similarity retrieval with HF embeddings
-🔤 BM25 Search                Keyword-based relevance matching
-🔀 Hybrid RRF Fusion          Combines vector + keyword rankings
-📈 Confidence Scoring          Retrieval, evidence, and overall confidence metrics
-🤖 Groq LLM                    Generates answers from retrieved context
-🧠 Grounded Responses         Prevents hallucinations via context restriction
-🚀 Production FastAPI          Auto-generated Swagger documentation
-🖥️  Streamlit Dashboard        Interactive, user-friendly interface
-🐳 Docker Compose             Reproducible, containerized deployment
-🔁 Persistent ChromaDB        Local vector database with embeddings
-```
+| Feature | Description |
+|---|---|
+| 📄 PDF Ingestion | Extract and index PDF documents |
+| ✂️ Recursive Chunking | Creates overlapping document chunks |
+| 🧠 Hugging Face Embeddings | Converts text into semantic vectors |
+| 🔵 Vector Search | Semantic retrieval with ChromaDB |
+| 🔤 BM25 Search | Exact-term and keyword retrieval |
+| 🔀 Hybrid RRF Fusion | Combines vector and BM25 rankings |
+| 📊 Confidence Scoring | Retrieval, evidence, and overall confidence |
+| 🤖 Groq LLM | Fast grounded answer generation |
+| 🛡️ Grounded Responses | Uses retrieved evidence for document answers |
+| 🚀 FastAPI | REST API with Swagger documentation |
+| 🖥️ Streamlit | Interactive question-answering dashboard |
+| 🐳 Docker Compose | Reproducible frontend/backend deployment |
+| 🔗 Docker Service Networking | Frontend reaches backend through `http://backend:8000` |
+| ❤️ API Health Monitoring | Frontend can check backend availability |
+| 💾 ChromaDB Persistence | Local vector-store data |
 
 ---
 
-## 🏗️ System Architecture
+## 🖥️ Application
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    PDF Documents                         │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│              PDF Loader (PyMuPDF)                        │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│          Recursive Chunking & Splitting                 │
-└────────────────────────┬────────────────────────────────┘
-                         │
-          ┌──────────────┴──────────────┐
-          ▼                             ▼
-  ┌──────────────────┐        ┌──────────────────┐
-  │  Embeddings      │        │  BM25 Indexing   │
-  │  (Hugging Face)  │        │  (Keyword Index) │
-  └────────┬─────────┘        └────────┬─────────┘
-           │                           │
-           ▼                           ▼
-  ┌──────────────────┐        ┌──────────────────┐
-  │  ChromaDB        │        │  BM25 Index      │
-  │  (Vector Store)  │        │  (Local)         │
-  └────────┬─────────┘        └────────┬─────────┘
-           └──────────────┬───────────┘
-                          ▼
-        ┌─────────────────────────────┐
-        │   Hybrid RRF Retrieval      │
-        │  (Rank Fusion)              │
-        └─────────────────┬───────────┘
-                          ▼
-        ┌─────────────────────────────┐
-        │  Confidence Scoring         │
-        │  (Quality Metrics)          │
-        └─────────────────┬───────────┘
-                          ▼
-        ┌─────────────────────────────┐
-        │  Groq LLM                   │
-        │  (Grounded Generation)      │
-        └─────────────────┬───────────┘
-                          ▼
-        ┌─────────────────────────────┐
-        │  Answer + Confidence Scores │
-        │  + Source Attribution       │
-        └─────────────────────────────┘
-```
+### Streamlit Frontend
+
+The dashboard provides:
+
+- Backend URL configuration
+- API health monitoring
+- Configurable retrieved chunks
+- Suggested questions
+- Generated answers
+- Retrieval quality metrics
+- Confidence scores
+- Source attribution
+
+![Streamlit Application](images/streamlit-ui.png)
 
 ---
 
-## 📁 Project Structure
+## 🏗️ Architecture
 
-```
-rag-hybrid-search/
-│
-├── 📂 data/
-│   ├── raw/                    # PDF documents (gitignored)
-│   └── chroma_db/              # Vector database (gitignored)
-│
-├── 📂 frontend/
-│   ├── ui.py                   # Streamlit application
-│   └── requirements.txt         # Frontend dependencies
-│
-├── 📂 src/
-│   ├── __init__.py
-│   ├── api.py                  # FastAPI server
-│   ├── loader.py               # PDF text extraction
-│   ├── splitter.py             # Recursive chunking
-│   ├── embedded.py             # Embedding generation
-│   ├── vectorstore.py          # ChromaDB integration
-│   ├── bm25_retriever.py       # BM25 search
-│   ├── hybrid_search.py        # RRF fusion logic
-│   ├── confidence.py           # Scoring metrics
-│   ├── rag_pipeline.py         # RAG orchestration
-│   └── groq_con.py             # Groq LLM connection
-│
-├── 📄 .env                     # Environment variables (gitignored)
-├── 📄 .gitignore
-├── 📄 Dockerfile
-├── 📄 docker-compose.yml       # Orchestration
-├── 📄 requirements.txt          # Backend dependencies
-├── 📄 README.md
-└── 📄 LICENSE
+```mermaid
+flowchart TD
+    A[PDF Documents] --> B[PyMuPDF Loader]
+    B --> C[Recursive Chunking]
+    C --> D[Hugging Face Embeddings]
+    C --> E[BM25 Indexing]
+    D --> F[ChromaDB Vector Store]
+    E --> G[BM25 Index]
+    F --> H[Hybrid Retrieval]
+    G --> H
+    H --> I[RRF Rank Fusion]
+    I --> J[Confidence Scoring]
+    J --> K[Groq LLM]
+    K --> L[Grounded Answer]
+    L --> M[FastAPI Backend]
+    M --> N[Streamlit Frontend]
+    N --> O[User]
 ```
 
-## 🖼️ Architecture Diagram
+### Retrieval Flow
 
-The system follows a production-style Hybrid RAG architecture combining semantic vector search, BM25 keyword retrieval, Reciprocal Rank Fusion (RRF), and Groq LLM generation.
+```text
+User Question
+      ↓
+FastAPI /v1/ask
+      ↓
+Hybrid Search
+   ↙       ↘
+Vector     BM25
+Search     Search
+   ↘       ↙
+  RRF Rank Fusion
+       ↓
+Confidence Scoring
+       ↓
+    Groq LLM
+       ↓
+Answer + Sources + Confidence
+```
 
 ![Hybrid RAG Architecture](images/architecture.png)
 
 ---
 
-## 🔀 Why Hybrid Search Matters
+## 🔀 Why Hybrid Search?
 
-### The Problem with Single Retrieval Methods
+| Method | Strength | Limitation |
+|---|---|---|
+| Vector Search | Semantic similarity | Can miss exact technical terminology |
+| BM25 | Exact keyword matching | Less effective with paraphrasing |
+| Hybrid Search | Combines both signals | Requires fusion logic |
 
-| Issue | Impact |
-|-------|--------|
-| **Vector-Only Search** | May miss technical terminology or exact phrase matching |
-| **Keyword-Only Search** | Struggles with paraphrased or differently worded queries |
-| **No Ranking Fusion** | Suboptimal result ordering from overlapping strategies |
+RRF combines rankings from both retrieval strategies to produce a more robust final ranking.
 
-### The Hybrid Solution
-
+```text
+Vector Ranking ──┐
+                 ├──> RRF Fusion ──> Final Ranking
+BM25 Ranking ────┘
 ```
-Vector Ranking (semantic)
-        ↓
-    RRF Fusion  ← Reciprocal Rank Fusion
-        ↓
-BM25 Ranking (keyword)
-        ↓
-   Optimal Results
-```
-
-**Result**: A more robust, accurate retrieval system that captures both semantic meaning and exact terminology.
 
 ---
 
 ## 📊 Confidence Scoring
 
-Every answer includes transparency metrics:
+Example response:
 
 ```json
 {
   "question": "What does hybrid search combine?",
-  "answer": "Hybrid search combines semantic vector search with keyword-based retrieval such as BM25.",
+  "answer": "Hybrid search combines semantic vector retrieval with keyword-based retrieval such as BM25.",
   "confidence": {
     "retrieval_confidence": 0.85,
     "evidence_confidence": 0.95,
     "overall_confidence": 0.89
   },
   "retrieved_chunks": 5,
-  "sources": [
-    "Machine_Learning.pdf"
-  ]
+  "sources": ["Machine_Learning.pdf"]
 }
 ```
 
-**Metrics Explained**:
-- **Retrieval Confidence** (0-1): How well documents matched the query
-- **Evidence Confidence** (0-1): How relevant the evidence to the question
-- **Overall Confidence** (0-1): Combined assessment of answer quality
+| Metric | Meaning |
+|---|---|
+| Retrieval Confidence | Strength of document retrieval |
+| Evidence Confidence | Strength of evidence supporting the answer |
+| Overall Confidence | Combined application-level confidence |
+
+> These are application-level confidence indicators, not guaranteed factual probabilities.
+
+---
+
+## 📁 Project Structure
+
+```text
+rag-hybrid-search/
+│
+├── data/
+│   ├── raw/                    # Local PDF documents
+│   └── chroma_db/              # Local ChromaDB data
+│
+├── frontend/
+│   ├── ui.py                   # Streamlit application
+│   └── requirements.txt        # Frontend dependencies
+│
+├── src/
+│   ├── __init__.py
+│   ├── api.py                  # FastAPI application
+│   ├── loader.py               # PDF loading
+│   ├── splitter.py             # Recursive chunking
+│   ├── embedded.py             # Embeddings
+│   ├── vectorstore.py          # ChromaDB
+│   ├── bm25_retriever.py       # BM25 retrieval
+│   ├── hybrid_search.py        # Hybrid/RRF retrieval
+│   ├── confidence.py           # Confidence scoring
+│   ├── rag_pipeline.py         # RAG orchestration
+│   └── groq_con.py             # Groq integration
+│
+├── images/
+│   ├── streamlit-ui.png
+│   ├── architecture.png
+│   └── swagger-api.png
+│
+├── .env                        # Local secrets - NOT committed
+├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── README.md
+└── LICENSE
+```
 
 ---
 
 ## 🛠️ Technology Stack
 
 ### Backend
-- **Python 3.11** – Core language
-- **FastAPI** – High-performance REST API framework
-- **Uvicorn** – ASGI server
-- **LangChain** – RAG orchestration
-- **PyMuPDF** – PDF text extraction
-- **Sentence Transformers / HuggingFace** – Embeddings
-- **ChromaDB** – Vector database
-- **BM25** – Keyword retrieval
-- **Groq API** – Fast LLM inference
+
+- Python 3.11
+- FastAPI
+- Uvicorn
+- LangChain
+- PyMuPDF
+- Sentence Transformers / Hugging Face
+- ChromaDB
+- rank-bm25
+- Groq API
 
 ### Frontend
-- **Streamlit** – Interactive web interface
-- **Requests** – HTTP client
+
+- Streamlit
+- Requests
 
 ### Infrastructure
-- **Docker** & **Docker Compose** – Containerization and orchestration
+
+- Docker
+- Docker Compose
+- Conda / virtual environments
 
 ---
 
@@ -240,251 +247,266 @@ Every answer includes transparency metrics:
 
 ### Prerequisites
 
-- Docker Desktop ([Download](https://www.docker.com/products/docker-desktop))
+- Docker Desktop
 - Git
-- Groq API Key ([Get one free](https://groq.com))
+- Groq API key
 
-### Installation Steps
-
-#### 1️⃣ Clone the Repository
+### 1. Clone
 
 ```bash
 git clone https://github.com/Vishnutpillai/rag-hybrid-search.git
 cd rag-hybrid-search
 ```
 
-#### 2️⃣ Create `.env` File
-
-Create a `.env` file in the project root:
+### 2. Create `.env`
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-⚠️ **Security**: Never commit `.env` to version control.
+Never commit `.env`.
 
-#### 3️⃣ Build & Start
+### 3. Build and start
 
 ```bash
 docker compose up -d --build
 ```
 
-The first build may take a few minutes as dependencies install.
-
-#### 4️⃣ Verify Services
+### 4. Verify
 
 ```bash
 docker compose ps
 ```
 
-Expected output:
-```
-NAME                   STATUS
+Expected:
+
+```text
 hybrid-rag-backend     Up
 hybrid-rag-frontend    Up
 ```
 
-#### 5️⃣ Access the Application
+### 5. View logs
+
+```bash
+docker compose logs backend --tail=50
+docker compose logs frontend --tail=50
+```
+
+### 6. Open the application
 
 | Service | URL | Purpose |
-|---------|-----|---------|
-| 🎨 **Streamlit Frontend** | http://localhost:8501 | Interactive assistant UI |
-| 📚 **Swagger API Docs** | http://localhost:8000/docs | API documentation & testing |
-| ✅ **Health Check** | http://localhost:8000/health | Backend status |
-| 📄 **API Root** | http://localhost:8000/ | API information |
+|---|---|---|
+| Streamlit | `http://localhost:8501` | Main UI |
+| Swagger | `http://localhost:8000/docs` | API documentation |
+| Health | `http://localhost:8000/health` | Backend health |
+| API Root | `http://localhost:8000/` | API information |
+
+---
+
+## 🔗 Docker Compose Networking
+
+The frontend and backend run as separate services.
+
+Inside the Docker network, the frontend uses:
+
+```text
+http://backend:8000
+```
+
+From the Windows host/browser, use:
+
+```text
+http://localhost:8000
+```
+
+### Important
+
+Do **not** use `localhost:8000` as the backend URL from inside the frontend container.
+
+In Docker, `localhost` means the current container.
+
+```text
+Browser
+   │
+   ▼
+localhost:8501
+   │
+   ▼
+Streamlit Container
+   │
+   │ Docker network
+   ▼
+backend:8000
+   │
+   ▼
+FastAPI Container
+```
+
+The frontend configuration is:
+
+```yaml
+environment:
+  RAG_API_URL: http://backend:8000
+```
+
+This is the recommended service-to-service configuration for the Docker Compose setup.
+
+---
+
+## 🔌 FastAPI Backend
+
+The backend provides endpoints for:
+
+- Health checks
+- Document listing
+- PDF ingestion
+- RAG question answering
+
+![FastAPI Swagger UI](images/swagger-api.png)
+
+Open Swagger:
+
+```text
+http://localhost:8000/docs
+```
 
 ---
 
 ## 📡 API Endpoints
 
-### System Endpoints
+### `GET /`
 
-```http
-GET /
-Returns API information and metadata
-```
+Returns API information.
 
-```http
-GET /health
-Backend health check status
-```
+### `GET /health`
 
-### RAG Endpoints
+Checks backend availability.
 
-```http
-POST /v1/ask
-Query the document collection
+### `POST /v1/ask`
 
-Request:
+Ask a question against the indexed knowledge base.
+
+```json
 {
   "question": "What is deep learning?",
   "top_k": 5
 }
-
-Response:
-{
-  "question": "...",
-  "answer": "...",
-  "confidence": {...},
-  "sources": [...]
-}
 ```
 
-### Document Management
+### `GET /v1/documents`
 
-```http
-GET /v1/documents
-List all indexed documents
+Lists indexed documents.
 
-Response:
-{
-  "count": 3,
-  "documents": [
-    {
-      "filename": "Machine_Learning.pdf",
-      "path": "data/raw/Machine_Learning.pdf",
-      "type": "PDF",
-      "indexed": true
-    }
-  ]
-}
+### `POST /v1/ingest`
+
+Uploads and indexes a PDF.
+
+Request type:
+
+```text
+multipart/form-data
 ```
 
-```http
-POST /v1/ingest
-Upload and index a PDF document
+Field:
 
-Content-Type: multipart/form-data
-Body: file (PDF)
+```text
+file
 ```
 
 ---
 
-## 💡 Example Queries
+## 📄 Document Processing Pipeline
 
-After indexing documents, try these questions:
-
-- "What is machine learning?"
-- "Explain the difference between supervised and unsupervised learning"
-- "What does hybrid search combine?"
-- "How do neural networks work?"
-- "What is the role of embeddings in RAG?"
-- "Compare BM25 and vector search"
-
----
-
-## 📊 Frontend Interface
-
-The Streamlit application provides:
-
-✅ Backend URL configuration  
-✅ Real-time API health monitoring  
-✅ Question input with examples  
-✅ Suggested question templates  
-✅ Generated answers with grounding  
-✅ Confidence score visualization  
-✅ Retrieved sources attribution  
-✅ Document collection overview  
-
----
-
-## 🐳 Docker Compose Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│           Docker Compose Network                │
-│                                                 │
-│  ┌──────────────────┐  ┌─────────────────────┐ │
-│  │  FastAPI Backend │  │  Streamlit Frontend │ │
-│  │   Port: 8000     │  │   Port: 8501        │ │
-│  │   (Uvicorn)      │  │   (Python app)      │ │
-│  └────────┬─────────┘  └──────────┬──────────┘ │
-│           │                       │             │
-│           └───────── HTTP ────────┘             │
-│                                                 │
-│  Shared Volumes:                                │
-│  • data/raw/         (PDFs)                     │
-│  • data/chroma_db/   (Vector DB)                │
-│                                                 │
-└─────────────────────────────────────────────────┘
+```text
+PDF
+ ↓
+PyMuPDF
+ ↓
+Text Extraction
+ ↓
+Recursive Chunking
+ ↓
+ ┌────────────────┐
+ │                │
+ ▼                ▼
+Embeddings       BM25
+ │                │
+ ▼                ▼
+ChromaDB        BM25 Index
+ │                │
+ └───────┬────────┘
+         ▼
+   Hybrid Search
+         ▼
+     RRF Fusion
+         ▼
+ Confidence Scoring
+         ▼
+      Groq LLM
+         ▼
+   Grounded Answer
 ```
 
 ---
 
-## 📋 Useful Docker Commands
+## 💡 Example Questions
 
-### Container Management
+```text
+What is machine learning?
+
+What is deep learning?
+
+Explain the difference between supervised and unsupervised learning.
+
+What does hybrid search combine?
+
+How do neural networks work?
+
+What is the role of embeddings in RAG?
+
+Compare BM25 and vector search.
+
+What is overfitting?
+```
+
+---
+
+## 🖥️ Run Without Docker
+
+### Backend
 
 ```bash
-# View running containers
-docker compose ps
-
-# View all logs
-docker compose logs -f
-
-# Backend-specific logs
-docker compose logs -f backend
-
-# Frontend-specific logs
-docker compose logs -f frontend
-
-# Stop services
-docker compose down
-
-# Restart services
-docker compose restart
-
-# Rebuild without cache
-docker compose build --no-cache
-```
-
-### Cleanup
-
-```bash
-# Remove stopped containers
-docker container prune
-
-# Remove unused Docker images
-docker image prune
-
-# Clear build cache
-docker builder prune -af
-```
-
----
-
-## 🧰 Running Without Docker (Local Development)
-
-### Backend Setup
-
-```bash
-# Create and activate conda environment
 conda activate rag
 pip install -r requirements.txt
-
-# Start FastAPI server
 uvicorn src.api:app --reload
-
-# Backend runs on http://localhost:8000
 ```
 
-## 🔌 FastAPI Backend
+Backend:
 
-The backend provides REST API endpoints for health checks, document ingestion, document listing, and RAG-based question answering.
+```text
+http://localhost:8000
+```
 
-![FastAPI Swagger UI](images/swagger-api.png)
+### Frontend
 
-### Frontend Setup
+Open another terminal:
 
 ```bash
-# Open another terminal
 conda activate rag
 pip install -r frontend/requirements.txt
-
-# Start Streamlit app
 streamlit run frontend/ui.py
+```
 
-# Frontend runs on http://localhost:8501
+Frontend:
+
+```text
+http://localhost:8501
+```
+
+For local non-Docker execution, the frontend backend URL should point to:
+
+```text
+http://localhost:8000
 ```
 
 ---
@@ -492,175 +514,287 @@ streamlit run frontend/ui.py
 ## 🔐 Environment Variables
 
 | Variable | Required | Description |
-|----------|----------|-------------|
-| `GROQ_API_KEY` | ✅ Yes | API key for Groq LLM inference |
+|---|---|---|
+| `GROQ_API_KEY` | Yes | Groq LLM API key |
+| `RAG_API_URL` | Docker frontend | FastAPI backend URL |
 
-### Example `.env`
+Example:
 
 ```env
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxx
 ```
 
-### Security Best Practices
+Docker:
 
-❌ **Never expose your API key in**:
-- GitHub repositories
+```yaml
+environment:
+  RAG_API_URL: http://backend:8000
+```
+
+### Security
+
+Never expose API keys in:
+
+- GitHub
 - README files
-- Screenshots or logs
+- Screenshots
 - Source code
 - Docker images
-- Public documentation
-
-✅ **Always store secrets in**:
-- `.env` files (locally)
-- Environment variables
-- Secure vault systems (production)
+- Public logs
+- Commit history
 
 ---
 
-## ⚠️ Important Notes
-
-### PDF Files
-
-Large or copyrighted documents should **not** be committed to Git:
+## 🐳 Docker Commands
 
 ```bash
-# Add to .gitignore
+# Start
+docker compose up -d
+
+# Build and start
+docker compose up -d --build
+
+# Check containers
+docker compose ps
+
+# All logs
+docker compose logs -f
+
+# Backend logs
+docker compose logs -f backend
+
+# Frontend logs
+docker compose logs -f frontend
+
+# Stop
+docker compose down
+
+# Restart
+docker compose restart
+
+# Rebuild without cache
+docker compose build --no-cache
+```
+
+---
+
+## 🧪 Troubleshooting
+
+### `API is not reachable`
+
+Run:
+
+```bash
+docker compose ps
+```
+
+Both services should be `Up`.
+
+Then:
+
+```bash
+docker compose logs backend --tail=100
+```
+
+Test:
+
+```text
+http://localhost:8000/health
+```
+
+For the Docker frontend, make sure:
+
+```text
+RAG_API_URL=http://backend:8000
+```
+
+not:
+
+```text
+RAG_API_URL=http://localhost:8000
+```
+
+### Containers are not running
+
+```bash
+docker compose up -d --build
+docker compose ps
+```
+
+### Backend/RAG initialization fails
+
+Check:
+
+```bash
+docker compose logs backend --tail=100
+```
+
+Verify:
+
+- Required dependencies are installed
+- PDF data is available to the application
+- ChromaDB data is accessible when expected
+- `GROQ_API_KEY` is configured
+- The RAG pipeline initializes successfully
+
+---
+
+## 📦 Git Hygiene
+
+Recommended `.gitignore`:
+
+```gitignore
+.env
 *.pdf
 data/raw/
-```
-
-Store PDFs in `data/raw/` directory locally.
-
-### Vector Database
-
-ChromaDB can become large and should be excluded from Git:
-
-```bash
-# Add to .gitignore
 data/chroma_db/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.DS_Store
+.vscode/
+.idea/
 ```
 
-Database persists between container restarts in Docker volumes.
-
-### Git Hygiene
-
-```
-.gitignore should include:
-- .env (secrets)
-- *.pdf (documents)
-- data/chroma_db/ (vector DB)
-- __pycache__/
-- *.egg-info/
-- .DS_Store
-```
+Never commit API keys, private documents, local vector databases, or temporary files.
 
 ---
 
-## 🔮 Future Roadmap
+## 🗺️ Roadmap
 
-### Near-term
-- [ ] Authentication & authorization
+### Near Term
+
+- [ ] Authentication and authorization
 - [ ] PostgreSQL metadata storage
-- [ ] Redis caching layer
+- [ ] Redis caching
 - [ ] Background document processing
+- [ ] Improved error handling
+- [ ] Automated API tests
 
-### Medium-term
+### Medium Term
+
 - [ ] Streaming LLM responses
 - [ ] Cross-encoder re-ranking
-- [ ] RAGAS evaluation framework
-- [ ] Document deletion/re-indexing API
+- [ ] RAGAS evaluation
+- [ ] Document deletion and re-indexing
+- [ ] Page-level source citations
 
-### Long-term
+### Long Term
+
 - [ ] Multi-user document collections
 - [ ] Prometheus/Grafana monitoring
 - [ ] CI/CD pipeline
-- [ ] Automated test suite
-- [ ] Cloud deployment (AWS/GCP/Azure)
-- [ ] Advanced citation & source grounding
+- [ ] Cloud deployment
+- [ ] Scalable vector database
+- [ ] Advanced observability
 
 ---
 
 ## 🎯 What This Project Demonstrates
 
-### Machine Learning & NLP
+### AI / Machine Learning
+
+```text
+Python
+ ├── NLP
+ ├── Information Retrieval
+ ├── Embeddings
+ ├── Vector Search
+ ├── BM25
+ ├── Hybrid Search
+ ├── RRF Rank Fusion
+ ├── RAG Architecture
+ └── LLM Integration
 ```
-Python Expertise
-├── Machine Learning & NLP
-├── Embeddings & Vector Spaces
-├── Information Retrieval
-├── Hybrid Search Algorithms
-├── RAG Systems Architecture
-└── LLM Integration & Prompting
+
+### Backend Engineering
+
+```text
+FastAPI
+ ├── REST API
+ ├── Health Checks
+ ├── Document Ingestion
+ ├── RAG Query Endpoint
+ └── Swagger Documentation
 ```
 
 ### Production Engineering
+
+```text
+Docker
+ ├── Containerization
+ ├── Docker Compose
+ ├── Multi-Service Architecture
+ ├── Service-to-Service Networking
+ ├── Environment Variables
+ └── Restart Policies
 ```
-Full-Stack Development
-├── REST API Design (FastAPI)
-├── Containerization (Docker)
-├── Orchestration (Docker Compose)
-├── UI Development (Streamlit)
-├── Environment Management
-└── Service Architecture
+
+### Frontend
+
+```text
+Streamlit
+ ├── Interactive UI
+ ├── API Health Monitoring
+ ├── Question Input
+ ├── Answer Display
+ ├── Confidence Metrics
+ └── Source Attribution
 ```
 
 ---
 
-## 👨‍💻 About the Author
+## 👨‍💻 Author
 
-**Vishnu T Pillai**  
-Aspiring Data Scientist & AI Engineer focused on Machine Learning, Deep Learning, RAG systems, and production-oriented AI applications.
+### Vishnu T Pillai
 
-### Connect & Follow
+**Aspiring Data Scientist & AI Engineer**
 
-🔗 **LinkedIn**: [linkedin.com/in/vishnu-t-pillai](https://www.linkedin.com/in/vishnu-t-pillai)  
-🐙 **GitHub**: [github.com/Vishnutpillai](https://github.com/Vishnutpillai)
+Focused on Machine Learning, Deep Learning, NLP, RAG Systems, Generative AI, Data Science, and production-oriented AI applications.
 
----
-
-## ⭐ Show Your Support
-
-If this project helped you understand Hybrid Search, RAG systems, FastAPI, Docker, or LLM integration:
-
-**Please consider giving this repository a ⭐ on GitHub!**
-
-Your support encourages further development and improvements.
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
+- LinkedIn: https://www.linkedin.com/in/vishnu-t-pillai
+- GitHub: https://github.com/Vishnutpillai
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to:
-
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create a feature branch
+
+```bash
+git checkout -b feature/amazing-feature
+```
+
+3. Commit your changes
+
+```bash
+git commit -m "Add amazing feature"
+```
+
+4. Push the branch
+
+```bash
+git push origin feature/amazing-feature
+```
+
 5. Open a Pull Request
 
 ---
 
-## 📞 Support & Feedback
+## 📄 License
 
-Have questions or suggestions? Feel free to:
+This project is licensed under the **MIT License**.
 
-- 📧 Open an issue on GitHub
-- 💬 Reach out via LinkedIn
-- 🐛 Report bugs with detailed examples
+See [`LICENSE`](LICENSE) for details.
 
 ---
 
 <div align="center">
 
-### Built with ❤️ for the AI Community
+### ⚡ Built with Python, FastAPI, Streamlit, ChromaDB, BM25, Docker & Groq
 
-**[⬆ back to top](#-hybrid-rag-ai-assistant)**
+**Hybrid Retrieval • Grounded Generation • Production-Oriented RAG**
 
 </div>
