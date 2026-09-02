@@ -4,7 +4,18 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-latest-red?style=flat-square&logo=streamlit)](https://streamlit.io/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue?style=flat-square&logo=docker)](https://www.docker.com/)
+[![ChromaDB](https://img.shields.io/badge/ChromaDB-VectorDB-orange?style=flat-square)](https://www.trychroma.com/)
+[![LangChain](https://img.shields.io/badge/LangChain-Orchestration-1C3C3C?style=flat-square&logo=langchain)](https://www.langchain.com/)
+[![Groq](https://img.shields.io/badge/Groq-LLM_Inference-F55036?style=flat-square)](https://groq.com/)
+[![HuggingFace](https://img.shields.io/badge/🤗-Embeddings-yellow?style=flat-square)](https://huggingface.co/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
+
+[![Stars](https://img.shields.io/github/stars/Vishnutpillai/rag-hybrid-search?style=flat-square&color=yellow)](https://github.com/Vishnutpillai/rag-hybrid-search/stargazers)
+[![Forks](https://img.shields.io/github/forks/Vishnutpillai/rag-hybrid-search?style=flat-square)](https://github.com/Vishnutpillai/rag-hybrid-search/network/members)
+[![Issues](https://img.shields.io/github/issues/Vishnutpillai/rag-hybrid-search?style=flat-square)](https://github.com/Vishnutpillai/rag-hybrid-search/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/Vishnutpillai/rag-hybrid-search?style=flat-square)](https://github.com/Vishnutpillai/rag-hybrid-search/commits/main)
+[![Repo Size](https://img.shields.io/github/repo-size/Vishnutpillai/rag-hybrid-search?style=flat-square)](https://github.com/Vishnutpillai/rag-hybrid-search)
 
 > A production-ready Retrieval-Augmented Generation (RAG) application combining **Hybrid Search**, **Vector Embeddings**, **BM25 Keyword Matching**, **Confidence Scoring**, and **Groq LLMs** for intelligent document question-answering.
 
@@ -141,7 +152,8 @@ rag-hybrid-search/
 ├── 📄 README.md
 └── 📄 LICENSE
 ```
-## 🏗️ System Architecture
+
+## 🖼️ Architecture Diagram
 
 The system follows a production-style Hybrid RAG architecture combining semantic vector search, BM25 keyword retrieval, Reciprocal Rank Fusion (RRF), and Groq LLM generation.
 
@@ -455,12 +467,12 @@ uvicorn src.api:app --reload
 
 # Backend runs on http://localhost:8000
 ```
+
 ## 🔌 FastAPI Backend
 
 The backend provides REST API endpoints for health checks, document ingestion, document listing, and RAG-based question answering.
 
 ![FastAPI Swagger UI](images/swagger-api.png)
-
 
 ### Frontend Setup
 
@@ -603,7 +615,7 @@ Aspiring Data Scientist & AI Engineer focused on Machine Learning, Deep Learning
 ### Connect & Follow
 
 🔗 **LinkedIn**: [linkedin.com/in/vishnu-t-pillai](https://www.linkedin.com/in/vishnu-t-pillai)  
-🐙 **GitHub**: [github.com/Vishnutpillai](https://github.com/Vishnutpillai)  
+🐙 **GitHub**: [github.com/Vishnutpillai](https://github.com/Vishnutpillai)
 
 ---
 

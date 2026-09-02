@@ -48,6 +48,7 @@ app = FastAPI(
 # ============================================================
 
 class QuestionRequest(BaseModel):
+
     question: str = Field(
         ...,
         min_length=1,
@@ -101,6 +102,7 @@ def initialize_rag():
     )
 
     if not documents:
+
         raise ValueError(
             "No documents were loaded."
         )
@@ -121,6 +123,7 @@ def initialize_rag():
     )
 
     if not chunks:
+
         raise ValueError(
             "No chunks were created."
         )
@@ -172,6 +175,7 @@ def initialize_rag():
 def startup_event():
 
     try:
+
         RAW_DIR.mkdir(
             parents=True,
             exist_ok=True,
@@ -228,104 +232,35 @@ def health():
     )
 
     return {
-        "status": "healthy" if ready else "initializing",
+        "status": (
+            "healthy"
+            if ready
+            else "initializing"
+        ),
+
         "ready": ready,
-        "chunks": len(chunks) if chunks else 0,
+
+        "chunks": (
+            len(chunks)
+            if chunks
+            else 0
+        ),
+
         "top_k": TOP_K,
     }
-
-
-# ============================================================
-# SOURCE METADATA HELPER
-# ============================================================
-
-def build_sources(results):
-
-    sources = []
-
-    for rank, result in enumerate(
-        results,
-        start=1,
-    ):
-
-        if isinstance(result, dict):
-
-            document = result["document"]
-
-            source = document.metadata.get(
-                "source",
-                "unknown",
-            )
-
-            page = document.metadata.get(
-                "page",
-                "unknown",
-            )
-
-            if isinstance(page, int):
-                page += 1
-
-            sources.append(
-                {
-                    "rank": rank,
-                    "source": source,
-                    "page": page,
-                    "dense_score": float(
-                        result.get(
-                            "dense_score",
-                            0.0,
-                        )
-                    ),
-                    "bm25_score": float(
-                        result.get(
-                            "bm25_score",
-                            0.0,
-                        )
-                    ),
-                    "rrf_score": float(
-                        result.get(
-                            "rrf_score",
-                            0.0,
-                        )
-                    ),
-                }
-            )
-
-        else:
-
-            document = result[0]
-            score = result[1]
-
-            source = document.metadata.get(
-                "source",
-                "unknown",
-            )
-
-            page = document.metadata.get(
-                "page",
-                "unknown",
-            )
-
-            if isinstance(page, int):
-                page += 1
-
-            sources.append(
-                {
-                    "rank": rank,
-                    "source": source,
-                    "page": page,
-                    "score": float(score),
-                }
-            )
-
-    return sources
 
 
 # ============================================================
 # ASK QUESTION CORE
 # ============================================================
 
-def run_question(request: QuestionRequest):
+def run_question(
+    request: QuestionRequest
+):
+
+    # --------------------------------------------------------
+    # VALIDATE QUESTION
+    # --------------------------------------------------------
 
     if not request.question.strip():
 
@@ -333,6 +268,10 @@ def run_question(request: QuestionRequest):
             status_code=400,
             detail="Question cannot be empty.",
         )
+
+    # --------------------------------------------------------
+    # CHECK RAG READINESS
+    # --------------------------------------------------------
 
     if (
         vector_store is None
@@ -347,43 +286,103 @@ def run_question(request: QuestionRequest):
 
     try:
 
-        answer, results, confidence = (
-            answer_question(
-                request.question,
-                vector_store,
-                bm25,
-                chunks,
-                top_k=request.top_k,
-            )
+        # ====================================================
+        # RUN RAG PIPELINE
+        # ====================================================
+
+        result = answer_question(
+            request.question,
+            vector_store,
+            bm25,
+            chunks,
+            top_k=request.top_k,
         )
 
-        sources = build_sources(results)
+        # ====================================================
+        # EXTRACT RESULT
+        # ====================================================
+
+        answer = result.get(
+            "answer",
+            "",
+        )
+
+        mode = result.get(
+            "mode",
+            "rag",
+        )
+
+        confidence = result.get(
+            "confidence",
+            {
+                "retrieval_confidence": 0.0,
+                "evidence_confidence": 0.0,
+                "overall_confidence": 0.0,
+            },
+        )
+
+        sources = result.get(
+            "sources",
+            [],
+        )
+
+        retrieved_chunks = result.get(
+            "retrieved_chunks",
+            0,
+        )
+
+        # ====================================================
+        # RETURN API RESPONSE
+        # ====================================================
 
         return {
             "question": request.question,
+
             "answer": answer,
 
+            "mode": mode,
+
             "confidence": {
-                "retrieval_confidence": confidence[
-                    "retrieval_confidence"
-                ],
-                "evidence_confidence": confidence[
-                    "evidence_confidence"
-                ],
-                "overall_confidence": confidence[
-                    "overall_confidence"
-                ],
+                "retrieval_confidence": float(
+                    confidence.get(
+                        "retrieval_confidence",
+                        0.0,
+                    )
+                ),
+
+                "evidence_confidence": float(
+                    confidence.get(
+                        "evidence_confidence",
+                        0.0,
+                    )
+                ),
+
+                "overall_confidence": float(
+                    confidence.get(
+                        "overall_confidence",
+                        0.0,
+                    )
+                ),
             },
 
-            "retrieved_chunks": len(results),
+            "retrieved_chunks": retrieved_chunks,
 
             "sources": sources,
         }
 
     except HTTPException:
+
         raise
 
     except Exception as e:
+
+        print("\n" + "=" * 60)
+        print(" API ERROR")
+        print("=" * 60)
+
+        print(
+            f"Error: {e}"
+        )
 
         raise HTTPException(
             status_code=500,
@@ -400,7 +399,9 @@ def run_question(request: QuestionRequest):
     tags=["RAG"],
     summary="Ask a question",
 )
-def ask_v1(request: QuestionRequest):
+def ask_v1(
+    request: QuestionRequest
+):
 
     return run_question(request)
 
@@ -414,7 +415,9 @@ def ask_v1(request: QuestionRequest):
     tags=["Legacy"],
     include_in_schema=False,
 )
-def ask_legacy(request: QuestionRequest):
+def ask_legacy(
+    request: QuestionRequest
+):
 
     return run_question(request)
 
@@ -432,6 +435,10 @@ def list_documents():
 
     documents = []
 
+    # --------------------------------------------------------
+    # DEFAULT DOCUMENTS
+    # --------------------------------------------------------
+
     for pdf_path in PDF_PATHS:
 
         path = Path(pdf_path)
@@ -447,7 +454,10 @@ def list_documents():
                 }
             )
 
-    # Also include PDFs uploaded through /v1/ingest
+    # --------------------------------------------------------
+    # UPLOADED DOCUMENTS
+    # --------------------------------------------------------
+
     known_paths = {
         item["path"]
         for item in documents
@@ -484,7 +494,7 @@ def list_documents():
     summary="Upload and index a PDF document",
 )
 async def ingest_document(
-    file: UploadFile = File(...),
+    file: UploadFile = File(...)
 ):
 
     global chunks
@@ -501,9 +511,7 @@ async def ingest_document(
             detail="Filename is required.",
         )
 
-    if not file.filename.lower().endswith(
-        ".pdf"
-    ):
+    if not file.filename.lower().endswith(".pdf"):
 
         raise HTTPException(
             status_code=400,
@@ -518,7 +526,9 @@ async def ingest_document(
         file.filename
     ).name
 
-    destination = RAW_DIR / safe_filename
+    destination = (
+        RAW_DIR / safe_filename
+    )
 
     try:
 
@@ -531,7 +541,9 @@ async def ingest_document(
                 detail="Uploaded file is empty.",
             )
 
-        destination.write_bytes(content)
+        destination.write_bytes(
+            content
+        )
 
         print(
             f"\n New document uploaded: "
@@ -550,7 +562,10 @@ async def ingest_document(
 
             raise HTTPException(
                 status_code=400,
-                detail="Could not read the uploaded PDF.",
+                detail=(
+                    "Could not read "
+                    "the uploaded PDF."
+                ),
             )
 
         # ----------------------------------------------------
@@ -566,7 +581,10 @@ async def ingest_document(
 
             raise HTTPException(
                 status_code=400,
-                detail="No usable chunks found in PDF.",
+                detail=(
+                    "No usable chunks "
+                    "found in PDF."
+                ),
             )
 
         # ----------------------------------------------------
@@ -581,7 +599,9 @@ async def ingest_document(
         # UPDATE GLOBAL CHUNKS
         # ----------------------------------------------------
 
-        chunks.extend(new_chunks)
+        chunks.extend(
+            new_chunks
+        )
 
         # ----------------------------------------------------
         # REBUILD BM25
@@ -597,21 +617,37 @@ async def ingest_document(
 
         return {
             "status": "success",
-            "message": "Document indexed successfully.",
+
+            "message": (
+                "Document indexed successfully."
+            ),
+
             "filename": safe_filename,
-            "pages": len(new_documents),
-            "chunks_added": len(new_chunks),
-            "total_chunks": len(chunks),
+
+            "pages": len(
+                new_documents
+            ),
+
+            "chunks_added": len(
+                new_chunks
+            ),
+
+            "total_chunks": len(
+                chunks
+            ),
         }
 
     except HTTPException:
+
         raise
 
     except Exception as e:
 
         raise HTTPException(
             status_code=500,
-            detail=f"Ingestion failed: {str(e)}",
+            detail=(
+                f"Ingestion failed: {str(e)}"
+            ),
         )
 
 

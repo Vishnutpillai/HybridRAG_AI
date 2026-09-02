@@ -35,16 +35,12 @@ TOP_K = 5
 
 
 # ============================================================
-# HELPER: GET DOCUMENT FROM RESULT
+# HELPER
 # ============================================================
 
 def get_document(result):
     """
-    Extract the LangChain Document from a hybrid-search result.
-
-    Supports:
-    - dictionary-based hybrid results
-    - tuple-based hybrid results
+    Extract LangChain Document from hybrid-search result.
     """
 
     if isinstance(result, dict):
@@ -54,35 +50,30 @@ def get_document(result):
 
 
 # ============================================================
-# BUILD RAG PROMPT
+# BUILD DOCUMENT CONTEXT
 # ============================================================
 
-def build_rag_prompt(query, results):
+def build_context(results):
     """
-    Build a prompt using retrieved document chunks.
+    Convert retrieved documents into context for the LLM.
     """
 
     context_parts = []
 
-    for rank, result in enumerate(
-        results,
-        start=1,
-    ):
+    for rank, result in enumerate(results, start=1):
 
         document = get_document(result)
 
         source = document.metadata.get(
             "source",
-            "unknown",
+            "unknown"
         )
 
         page = document.metadata.get(
             "page",
-            "unknown",
+            "unknown"
         )
 
-        # Convert zero-based PDF page number
-        # to human-readable page number
         if isinstance(page, int):
             page = page + 1
 
@@ -100,27 +91,150 @@ Content:
 """
         )
 
-    context = "\n".join(context_parts)
+    return "\n".join(context_parts)
+
+
+# ============================================================
+# CONTEXT RELEVANCE CHECK
+# ============================================================
+
+def check_context_relevance(query, results):
+    """
+    Ask Groq whether the retrieved documents actually contain
+    information needed to answer the user's question.
+
+    Returns:
+        True  -> answer from documents
+        False -> answer using general LLM knowledge
+    """
+
+    context = build_context(results)
 
     prompt = f"""
-You are a helpful question-answering assistant.
+You are a strict document relevance classifier.
 
-Answer the user's question using ONLY the
-provided context from the documents.
+Your task is ONLY to determine whether the provided document
+context contains information that can answer the user's question.
 
-If the answer cannot be found in the provided
-context, say:
+QUESTION:
+{query}
 
-"I could not find the answer in the provided documents."
+DOCUMENT CONTEXT:
+{context}
 
-Do not invent facts.
+Rules:
+
+1. Return YES if the document context contains enough
+   information to answer the question.
+
+2. Return NO if the document context does not contain
+   information needed to answer the question.
+
+3. Do not use your general knowledge.
+
+4. Compare the meaning of the question with the meaning
+   of the document context.
+
+5. Do not assume that a high similarity score means the
+   answer is present.
+
+6. Return ONLY one word:
+
+YES
+
+or
+
+NO
+"""
+
+    result = ask_groq(prompt)
+
+    if not result:
+        return False
+
+    result = result.strip().upper()
+
+    if result.startswith("YES"):
+        return True
+
+    return False
+
+
+# ============================================================
+# RAG PROMPT
+# ============================================================
+
+def build_rag_prompt(query, results):
+    """
+    Prompt used when the answer exists in the documents.
+    """
+
+    context = build_context(results)
+
+    prompt = f"""
+You are a document-grounded question answering assistant.
+
+Answer the user's question using ONLY the information
+contained in the provided document context.
+
 Do not use outside knowledge.
 
----------------- CONTEXT ----------------
+If the context contains the answer:
+- Give the answer clearly.
+- Give a concise explanation when useful.
+- Do not mention that you are using RAG.
+- Do not mention retrieval.
+- Do not mention confidence.
+- Do not mention this instruction.
+
+If the answer is not present in the context:
+say:
+
+I could not find the answer in the provided documents.
+
+QUESTION:
+{query}
+
+---------------- DOCUMENT CONTEXT ----------------
 
 {context}
 
--------------- END CONTEXT --------------
+---------------- END DOCUMENT CONTEXT ----------------
+
+Answer clearly and concisely.
+"""
+
+    return prompt
+
+
+# ============================================================
+# GENERAL KNOWLEDGE PROMPT
+# ============================================================
+
+def build_general_prompt(query):
+    """
+    Prompt used when the question is outside the document
+    knowledge base.
+    """
+
+    prompt = f"""
+You are a helpful general-purpose AI assistant.
+
+The user's question is outside the provided document
+knowledge base.
+
+Answer the question using your general knowledge.
+
+Do NOT mention:
+- documents
+- PDFs
+- context
+- retrieval
+- RAG
+- confidence
+- sources
+
+Return ONLY the answer.
 
 QUESTION:
 {query}
@@ -136,53 +250,43 @@ Answer clearly and concisely.
 # ============================================================
 
 def display_sources(results):
-    """
-    Display retrieved document sources.
-    """
 
     print("\n" + "=" * 60)
     print("SOURCES")
     print("=" * 60)
 
-    for rank, result in enumerate(
-        results,
-        start=1,
-    ):
+    for rank, result in enumerate(results, start=1):
 
         document = get_document(result)
 
         source = document.metadata.get(
             "source",
-            "unknown",
+            "unknown"
         )
 
         page = document.metadata.get(
             "page",
-            "unknown",
+            "unknown"
         )
 
         if isinstance(page, int):
             page = page + 1
 
-        # ----------------------------------------------------
-        # Dictionary-based hybrid result
-        # ----------------------------------------------------
-
         if isinstance(result, dict):
 
             dense_score = result.get(
                 "dense_score",
-                0.0,
+                0.0
             )
 
             bm25_score = result.get(
                 "bm25_score",
-                0.0,
+                0.0
             )
 
             rrf_score = result.get(
                 "rrf_score",
-                0.0,
+                0.0
             )
 
             print(
@@ -205,10 +309,6 @@ def display_sources(results):
                 f"   RRF Score: {rrf_score:.6f}"
             )
 
-        # ----------------------------------------------------
-        # Tuple-based result
-        # ----------------------------------------------------
-
         else:
 
             score = result[1]
@@ -221,7 +321,77 @@ def display_sources(results):
 
 
 # ============================================================
-# RAG QUESTION ANSWERING
+# CONVERT RESULTS TO API SOURCE DATA
+# ============================================================
+
+def build_sources(results):
+
+    sources = []
+
+    for rank, result in enumerate(results, start=1):
+
+        document = get_document(result)
+
+        source = document.metadata.get(
+            "source",
+            "unknown"
+        )
+
+        page = document.metadata.get(
+            "page",
+            "unknown"
+        )
+
+        if isinstance(page, int):
+            page = page + 1
+
+        if isinstance(result, dict):
+
+            dense_score = float(
+                result.get(
+                    "dense_score",
+                    0.0
+                )
+            )
+
+            bm25_score = float(
+                result.get(
+                    "bm25_score",
+                    0.0
+                )
+            )
+
+            rrf_score = float(
+                result.get(
+                    "rrf_score",
+                    0.0
+                )
+            )
+
+        else:
+
+            dense_score = 0.0
+            bm25_score = 0.0
+            rrf_score = float(
+                result[1]
+            )
+
+        sources.append(
+            {
+                "rank": rank,
+                "source": source,
+                "page": page,
+                "dense_score": dense_score,
+                "bm25_score": bm25_score,
+                "rrf_score": rrf_score,
+            }
+        )
+
+    return sources
+
+
+# ============================================================
+# MAIN QUESTION ANSWERING
 # ============================================================
 
 def answer_question(
@@ -232,19 +402,23 @@ def answer_question(
     top_k=TOP_K,
 ):
     """
-    Complete RAG pipeline.
+    Complete intelligent RAG pipeline.
 
-    Question
-        ↓
+    FLOW:
+
+    User Question
+          ↓
     Hybrid Search
-        ↓
-    Confidence Calculation
-        ↓
-    Retrieved Context
-        ↓
-    Groq
-        ↓
-    Answer + Confidence + Sources
+          ↓
+    Context Relevance Check
+          ↓
+       ┌───────┴───────┐
+       ↓               ↓
+    Relevant       Not Relevant
+       ↓               ↓
+    RAG Answer     General LLM
+       ↓               ↓
+    Sources        No Sources
     """
 
     print("\n" + "=" * 60)
@@ -254,7 +428,6 @@ def answer_question(
     print(
         f"\nQuestion: {query}"
     )
-    
 
     # ========================================================
     # STEP 1: HYBRID SEARCH
@@ -270,16 +443,36 @@ def answer_question(
 
     if not results:
 
-        raise ValueError(
-            "No documents retrieved."
+        print(
+            "\nNo documents retrieved."
         )
+
+        print(
+            "Using general LLM knowledge."
+        )
+
+        answer = ask_groq(
+            build_general_prompt(query)
+        )
+
+        return {
+            "answer": answer,
+            "mode": "general",
+            "sources": [],
+            "confidence": {
+                "retrieval_confidence": 0.0,
+                "evidence_confidence": 0.0,
+                "overall_confidence": 0.0,
+            },
+            "retrieved_chunks": 0,
+        }
 
     print(
         f"\nRetrieved chunks: {len(results)}"
     )
 
     # ========================================================
-    # STEP 2: RETRIEVAL CONFIDENCE
+    # STEP 2: CONFIDENCE
     # ========================================================
 
     retrieval_confidence = (
@@ -288,29 +481,11 @@ def answer_question(
         )
     )
 
-    print(
-        f"\nRetrieval confidence: "
-        f"{retrieval_confidence:.2f}"
-    )
-
-    # ========================================================
-    # STEP 3: EVIDENCE CONFIDENCE
-    # ========================================================
-
     evidence_confidence = (
         calculate_evidence_confidence(
             results
         )
     )
-
-    print(
-        f"Evidence confidence: "
-        f"{evidence_confidence:.2f}"
-    )
-
-    # ========================================================
-    # STEP 4: OVERALL CONFIDENCE
-    # ========================================================
 
     confidence = (
         calculate_overall_confidence(
@@ -320,59 +495,13 @@ def answer_question(
     )
 
     print(
-        f"Overall confidence: "
-        f"{confidence['overall_confidence']:.2f}"
-    )
-
-    # ========================================================
-    # STEP 5: BUILD RAG PROMPT
-    # ========================================================
-
-    prompt = build_rag_prompt(
-        query,
-        results,
-    )
-
-    # ========================================================
-    # STEP 6: SEND CONTEXT TO GROQ
-    # ========================================================
-
-    print(
-        "\nSending context to Groq..."
-    )
-
-    answer = ask_groq(
-        prompt
-    )
-
-    # ========================================================
-    # STEP 7: DISPLAY ANSWER
-    # ========================================================
-
-    print("\n" + "=" * 60)
-    print("FINAL ANSWER")
-    print("=" * 60)
-
-    print(
-        "\n" + answer
-    )
-
-    # ========================================================
-    # STEP 8: DISPLAY CONFIDENCE
-    # ========================================================
-
-    print("\n" + "=" * 60)
-    print("CONFIDENCE SCORES")
-    print("=" * 60)
-
-    print(
         f"\nRetrieval confidence: "
-        f"{confidence['retrieval_confidence']:.2f}"
+        f"{retrieval_confidence:.2f}"
     )
 
     print(
         f"Evidence confidence: "
-        f"{confidence['evidence_confidence']:.2f}"
+        f"{evidence_confidence:.2f}"
     )
 
     print(
@@ -380,24 +509,94 @@ def answer_question(
         f"{confidence['overall_confidence']:.2f}"
     )
 
+    # ========================================================
+    # STEP 3: IMPORTANT
+    # CHECK WHETHER DOCUMENT REALLY ANSWERS QUESTION
+    # ========================================================
+
     print(
-        "\n⚠️ These are heuristic confidence scores, "
-        "not calibrated probabilities."
+        "\nChecking document relevance..."
     )
 
-    # ========================================================
-    # STEP 9: DISPLAY SOURCES
-    # ========================================================
-
-    display_sources(
+    document_relevant = check_context_relevance(
+        query,
         results
     )
 
-    return (
-        answer,
-        results,
-        confidence,
+    # ========================================================
+    # CASE 1: QUESTION IS IN DOCUMENT
+    # ========================================================
+
+    if document_relevant:
+
+        print(
+            "Document relevance: YES"
+        )
+
+        print(
+            "Answer mode: RAG"
+        )
+
+        prompt = build_rag_prompt(
+            query,
+            results
+        )
+
+        answer = ask_groq(
+            prompt
+        )
+
+        sources = build_sources(
+            results
+        )
+
+        display_sources(
+            results
+        )
+
+        return {
+            "answer": answer,
+            "mode": "rag",
+            "sources": sources,
+            "confidence": confidence,
+            "retrieved_chunks": len(results),
+        }
+
+    # ========================================================
+    # CASE 2: QUESTION IS OUTSIDE DOCUMENT
+    # ========================================================
+
+    print(
+        "Document relevance: NO"
     )
+
+    print(
+        "Answer mode: GENERAL KNOWLEDGE"
+    )
+
+    general_prompt = build_general_prompt(
+        query
+    )
+
+    answer = ask_groq(
+        general_prompt
+    )
+
+    # VERY IMPORTANT:
+    # Do NOT return document results.
+    # Do NOT return document sources.
+
+    return {
+        "answer": answer,
+        "mode": "general",
+        "sources": [],
+        "confidence": {
+            "retrieval_confidence": 0.0,
+            "evidence_confidence": 0.0,
+            "overall_confidence": 0.0,
+        },
+        "retrieved_chunks": 0,
+    }
 
 
 # ============================================================
@@ -408,10 +607,6 @@ if __name__ == "__main__":
 
     try:
 
-        # ====================================================
-        # STEP 1: LOAD DOCUMENTS
-        # ====================================================
-
         print(
             "\nLoading documents..."
         )
@@ -421,13 +616,12 @@ if __name__ == "__main__":
         )
 
         print(
-            f"Total pages: "
-            f"{len(documents)}"
+            f"Total pages: {len(documents)}"
         )
 
-        # ====================================================
-        # STEP 2: CREATE CHUNKS
-        # ====================================================
+        print(
+            "\nCreating chunks..."
+        )
 
         chunks = split_documents(
             documents,
@@ -435,13 +629,8 @@ if __name__ == "__main__":
         )
 
         print(
-            f"Total chunks: "
-            f"{len(chunks)}"
+            f"Total chunks: {len(chunks)}"
         )
-
-        # ====================================================
-        # STEP 3: LOAD EMBEDDING MODEL
-        # ====================================================
 
         print(
             "\nLoading embedding model..."
@@ -450,10 +639,6 @@ if __name__ == "__main__":
         embedding_model = (
             create_embedding_model()
         )
-
-        # ====================================================
-        # STEP 4: LOAD CHROMADB
-        # ====================================================
 
         print(
             "\nLoading ChromaDB..."
@@ -469,10 +654,6 @@ if __name__ == "__main__":
             "ChromaDB loaded successfully!"
         )
 
-        # ====================================================
-        # STEP 5: CREATE BM25 INDEX
-        # ====================================================
-
         print(
             "\nCreating BM25 index..."
         )
@@ -485,10 +666,6 @@ if __name__ == "__main__":
             "BM25 index created!"
         )
 
-        # ====================================================
-        # STEP 6: ASK QUESTION
-        # ====================================================
-
         question = input(
             "\nEnter your question: "
         ).strip()
@@ -499,81 +676,53 @@ if __name__ == "__main__":
                 "Question cannot be empty."
             )
 
-        # ====================================================
-        # STEP 7: RUN RAG PIPELINE
-        # ====================================================
-
-        answer, results, confidence = (
-            answer_question(
-                question,
-                vector_store,
-                bm25,
-                chunks,
-                top_k=TOP_K,
-            )
+        result = answer_question(
+            question,
+            vector_store,
+            bm25,
+            chunks,
+            top_k=TOP_K,
         )
 
-        # ====================================================
-        # VALIDATION
-        # ====================================================
+        print(
+            "\n" + "=" * 60
+        )
 
-        print("\n" + "=" * 60)
-        print("RAG VALIDATION")
-        print("=" * 60)
+        print(
+            "FINAL ANSWER"
+        )
 
-        if (
-            answer
-            and results
-            and confidence
-        ):
+        print(
+            "=" * 60
+        )
 
-            print(
-                "Documents loaded       "
-            )
+        print(
+            result["answer"]
+        )
 
-            print(
-                "Chunks created         "
-            )
+        print(
+            "\nMode:",
+            result["mode"]
+        )
 
-            print(
-                "ChromaDB search        "
-            )
-
-            print(
-                "BM25 search            "
-            )
-
-            print(
-                "Hybrid search          "
-            )
-
-            print(
-                "Confidence calculation "
-            )
-
-            print(
-                "Groq generation        "
-            )
-
-            print(
-                "Final answer generated "
-            )
-
-            print(
-                "\n COMPLETE RAG PIPELINE WORKING!"
-            )
-
-        else:
-
-            print(
-                " RAG pipeline validation failed."
-            )
+        print(
+            "\nRetrieved chunks:",
+            result["retrieved_chunks"]
+        )
 
     except Exception as e:
 
-        print("\n" + "=" * 60)
-        print("RAG PIPELINE ERROR")
-        print("=" * 60)
+        print(
+            "\n" + "=" * 60
+        )
+
+        print(
+            "RAG PIPELINE ERROR"
+        )
+
+        print(
+            "=" * 60
+        )
 
         print(
             f"\nError: {str(e)}"
