@@ -11,7 +11,7 @@ services:
       - .env
 
     ports:
-      - "8000:8000"
+      - "8000:10000"
 
     volumes:
       - ./data:/app/data
@@ -27,7 +27,7 @@ services:
     container_name: hybrid-rag-frontend
 
     environment:
-      RAG_API_URL: http://backend:8000
+      RAG_API_URL: http://backend:10000
 
     ports:
       - "8501:8501"
