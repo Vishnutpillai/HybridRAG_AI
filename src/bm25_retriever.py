@@ -287,10 +287,7 @@ if __name__ == "__main__":
         print("STEP 3: BUILDING BM25 INDEX")
         print("=" * 60)
 
-        bm25, tokenized_corpus = (
-            create_bm25_retriever(chunks)
-        )
-
+        bm25 = create_bm25_retriever(chunks)
         # ====================================================
         # STEP 4: TEST SEARCH
         # ====================================================
