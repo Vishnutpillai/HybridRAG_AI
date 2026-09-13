@@ -78,7 +78,7 @@ The dashboard provides:
 - Confidence scores
 - Source attribution
 
-![Streamlit Application](images/streamlit-ui.png)
+![Streamlit Application](images/streamlits-ui.png)
 
 ---
 
@@ -124,7 +124,7 @@ Confidence Scoring
 Answer + Sources + Confidence
 ```
 
-![Hybrid RAG Architecture](images/architecture.png)
+![Hybrid RAG Architecture](images/architectures.png)
 
 ---
 
