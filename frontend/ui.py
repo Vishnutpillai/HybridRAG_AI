@@ -27,26 +27,23 @@ DEFAULT_API_URL = os.getenv(
 
 
 # ============================================================
-# HTML RENDER HELPER  (fix for indented-HTML-becomes-code-block bug)
+# HTML RENDER HELPER
 # ============================================================
 
 def render_html(content: str) -> None:
     """
-    Render a raw HTML string with st.markdown safely.
-
-    A <div>...</div> (or <style>...</style>, <p>...</p>, etc.) block is
-    only treated as raw HTML up to the first blank line. After that,
-    Markdown parses the next line as an *indented code block* if it's
-    indented 4+ spaces -- which is exactly what nicely-indented,
-    triple-quoted HTML strings look like. textwrap.dedent() does NOT
-    fix this: it only removes whitespace common to every line, so
-    nested tags (indented deeper than their parent) stay indented and
-    still trigger the bug. Stripping each line's leading whitespace
-    individually keeps every tag flush at column 0, so Markdown always
-    recognizes it as HTML instead of code.
+    Render raw HTML safely using Streamlit.
     """
-    flattened = "\n".join(line.strip() for line in content.strip("\n").splitlines())
-    st.markdown(flattened, unsafe_allow_html=True)
+
+    flattened = "\n".join(
+        line.strip()
+        for line in content.strip("\n").splitlines()
+    )
+
+    st.markdown(
+        flattened,
+        unsafe_allow_html=True
+    )
 
 
 # ============================================================
@@ -59,7 +56,7 @@ render_html(
 
     /* ==================================================
        MAIN APP
-    ================================================== */
+       ================================================== */
 
     .stApp {
         background:
@@ -99,7 +96,7 @@ render_html(
 
     /* ==================================================
        HERO
-    ================================================== */
+       ================================================== */
 
     .hero {
         padding: 30px 34px;
@@ -158,22 +155,19 @@ render_html(
 
     /* ==================================================
        SECTION TITLES
-    ================================================== */
+       ================================================== */
 
     .section-title {
         color: #f8fafc;
-
         font-size: 20px;
-
         font-weight: 750;
-
         margin: 14px 0;
     }
 
 
     /* ==================================================
        ANSWER BOX
-    ================================================== */
+       ================================================== */
 
     .answer-box {
         background:
@@ -202,7 +196,7 @@ render_html(
 
     /* ==================================================
        GENERAL ANSWER
-    ================================================== */
+       ================================================== */
 
     .general-answer {
         background:
@@ -228,7 +222,7 @@ render_html(
 
     /* ==================================================
        INFO BOX
-    ================================================== */
+       ================================================== */
 
     .info-box {
         background: rgba(14,165,233,.10);
@@ -248,8 +242,36 @@ render_html(
 
 
     /* ==================================================
+       UPLOAD BOX
+       ================================================== */
+
+    .upload-box {
+        background:
+            linear-gradient(
+                145deg,
+                rgba(99,102,241,.12),
+                rgba(14,165,233,.08)
+            );
+
+        border: 1px solid rgba(129,140,248,.25);
+
+        border-radius: 15px;
+
+        padding: 15px;
+
+        margin-bottom: 12px;
+
+        color: #dbeafe;
+
+        font-size: 13px;
+
+        line-height: 1.6;
+    }
+
+
+    /* ==================================================
        SOURCE CARD
-    ================================================== */
+       ================================================== */
 
     .source-card {
         background: rgba(15,23,42,.72);
@@ -282,7 +304,7 @@ render_html(
 
     /* ==================================================
        STATUS
-    ================================================== */
+       ================================================== */
 
     .status {
         padding: 10px 12px;
@@ -302,14 +324,13 @@ render_html(
 
     .muted {
         color: #94a3b8;
-
         font-size: 13px;
     }
 
 
     /* ==================================================
        FOOTER
-    ================================================== */
+       ================================================== */
 
     .footer {
         text-align: center;
@@ -326,7 +347,7 @@ render_html(
 
     /* ==================================================
        TEXT AREA
-    ================================================== */
+       ================================================== */
 
     div[data-testid="stTextArea"] textarea {
         background: rgba(15,23,42,.85) !important;
@@ -341,7 +362,7 @@ render_html(
 
     /* ==================================================
        BUTTON
-    ================================================== */
+       ================================================== */
 
     .stButton > button {
         width: 100%;
@@ -378,7 +399,7 @@ render_html(
 
     /* ==================================================
        METRICS
-    ================================================== */
+       ================================================== */
 
     div[data-testid="stMetric"] {
         background: rgba(15,23,42,.65);
@@ -388,15 +409,6 @@ render_html(
         padding: 15px;
 
         border-radius: 15px;
-    }
-
-
-    /* ==================================================
-       SIDEBAR SLIDER
-    ================================================== */
-
-    div[data-testid="stSidebar"] .stSlider {
-        margin-bottom: 5px;
     }
 
     </style>
@@ -420,6 +432,7 @@ if "answer_data" not in st.session_state:
 # ============================================================
 
 def ask_api(question, api_url):
+
     response = requests.post(
         api_url.rstrip("/") + "/ask",
         json={
@@ -433,8 +446,35 @@ def ask_api(question, api_url):
     return response.json()
 
 
+def upload_pdf(uploaded_file, api_url):
+
+    """
+    Upload PDF to FastAPI /v1/ingest endpoint.
+    """
+
+    files = {
+        "file": (
+            uploaded_file.name,
+            uploaded_file.getvalue(),
+            "application/pdf"
+        )
+    }
+
+    response = requests.post(
+        api_url.rstrip("/") + "/v1/ingest",
+        files=files,
+        timeout=300
+    )
+
+    response.raise_for_status()
+
+    return response.json()
+
+
 def score_percent(value):
+
     try:
+
         return max(
             0,
             min(
@@ -444,11 +484,14 @@ def score_percent(value):
         )
 
     except (TypeError, ValueError):
+
         return 0
 
 
 def source_name(path):
+
     if not path:
+
         return "Unknown document"
 
     return (
@@ -482,20 +525,10 @@ with st.sidebar:
     api_url = st.text_input(
         "FastAPI URL",
         value=DEFAULT_API_URL,
-        help="Docker Compose: http://backend:8000 | Local: http://localhost:8000"
-    )
-
-
-    # ========================================================
-    # RETRIEVED CHUNKS
-    # ========================================================
-
-    retrieved_k = st.slider(
-        "Retrieved chunks",
-        min_value=1,
-        max_value=10,
-        value=5,
-        step=1
+        help=(
+            "Docker Compose: http://backend:8000 | "
+            "Local: http://localhost:8000"
+        )
     )
 
 
@@ -535,6 +568,136 @@ with st.sidebar:
 
 
     # ========================================================
+    # PDF UPLOAD
+    # ========================================================
+
+    st.markdown("### 📤 Upload PDF")
+
+    render_html(
+        """
+        <div class="upload-box">
+
+        Upload a PDF The backend will process and index the
+        document for RAG retrieval.
+
+        </div>
+        """
+    )
+
+    uploaded_file = st.file_uploader(
+        "Choose a PDF",
+        type=["pdf"],
+        accept_multiple_files=False,
+        label_visibility="collapsed"
+    )
+
+
+    if uploaded_file is not None:
+
+        st.caption(
+            f"📄 {uploaded_file.name}"
+        )
+
+        st.caption(
+            f"Size: {uploaded_file.size / (1024 * 1024):.2f} MB"
+        )
+
+
+        if st.button(
+            "⬆️ Upload & Index PDF",
+            use_container_width=True
+        ):
+
+            with st.spinner(
+                "Uploading and indexing PDF..."
+            ):
+
+                try:
+
+                    upload_result = upload_pdf(
+                        uploaded_file,
+                        api_url
+                    )
+
+                    st.success(
+                        "✅ PDF uploaded and indexed successfully!"
+                    )
+
+
+                    # Show backend response
+                    with st.expander(
+                        "📋 Upload details"
+                    ):
+
+                        st.json(
+                            upload_result
+                        )
+
+
+                except requests.exceptions.ConnectionError:
+
+                    st.error(
+                        """
+                        ❌ Could not connect to FastAPI.
+
+                        Make sure your backend is running.
+                        """
+                    )
+
+
+                except requests.exceptions.Timeout:
+
+                    st.error(
+                        "⏱️ Upload timed out. Large PDFs may take longer to process."
+                    )
+
+
+                except requests.exceptions.HTTPError as e:
+
+                    try:
+
+                        detail = e.response.json()
+
+                    except Exception:
+
+                        detail = (
+                            e.response.text
+                            if e.response is not None
+                            else ""
+                        )
+
+                    st.error(
+                        f"❌ Upload failed: {detail}"
+                    )
+
+
+                except Exception as e:
+
+                    st.error(
+                        f"❌ Unexpected upload error: {e}"
+                    )
+
+
+    st.divider()
+
+
+    # ========================================================
+    # RETRIEVED CHUNKS
+    # ========================================================
+
+    retrieved_k = st.slider(
+        "Retrieved chunks",
+        min_value=1,
+        max_value=10,
+        value=5,
+        step=1
+    )
+
+
+    st.divider()
+
+
+    # ========================================================
     # PIPELINE
     # ========================================================
 
@@ -551,6 +714,9 @@ with st.sidebar:
         <div class="muted">
 
         📄 PDF Documents
+        <br><br>
+
+        📤 PDF Upload & Indexing
         <br><br>
 
         ✂️ Recursive Chunking
@@ -603,7 +769,9 @@ with st.sidebar:
     # CLEAR CONVERSATION
     # ========================================================
 
-    if st.button("🗑️ Clear conversation"):
+    if st.button(
+        "🗑️ Clear conversation"
+    ):
 
         st.session_state.history = []
 
@@ -629,10 +797,16 @@ render_html(
         </div>
 
         <p class="hero-description">
-            Ask questions about your Machine Learning and Deep Learning
-            knowledge base. Document questions are answered using
-            retrieved evidence, while general questions can be answered
-            using general LLM knowledge.
+
+            Ask questions about your Machine Learning
+            and Deep Learning knowledge base.
+
+            Document questions use hybrid retrieval
+            with semantic search and BM25.
+
+            You can also upload new PDF documents
+            directly through the interface.
+
         </p>
 
     </div>
@@ -871,9 +1045,13 @@ if data:
         render_html(
             """
             <div class="info-box">
-                🌐 This question is outside the document
-                knowledge base. The answer below is generated
+
+                🌐 This question is outside the
+                document knowledge base.
+
+                The answer below is generated
                 using general LLM knowledge.
+
             </div>
             """
         )
@@ -882,7 +1060,9 @@ if data:
         render_html(
             f"""
             <div class="general-answer">
+
                 {safe_answer}
+
             </div>
             """
         )
@@ -893,14 +1073,16 @@ if data:
         render_html(
             f"""
             <div class="answer-box">
+
                 {safe_answer}
+
             </div>
             """
         )
 
 
     # ========================================================
-    # OUT OF SCOPE
+    # GENERAL KNOWLEDGE
     # ========================================================
 
     if out_of_scope:
@@ -1055,7 +1237,11 @@ if data:
                     <div class="source-card">
 
                         <div class="source-title">
-                            #{rank} &nbsp; {html.escape(str(source))}
+
+                            #{rank}
+                            &nbsp;
+                            {html.escape(str(source))}
+
                         </div>
 
                         <div class="source-meta">
@@ -1134,15 +1320,19 @@ render_html(
     """
     <div class="footer">
 
-        <strong>Hybrid RAG AI Assistant</strong>
+        <strong>
+            Hybrid RAG AI Assistant
+        </strong>
 
         <br>
 
-        Semantic Search • BM25 • RRF • Groq • General Knowledge Fallback
+        Semantic Search • BM25 • RRF •
+        Groq • General Knowledge Fallback
 
         <br><br>
 
-        Built with Python • FastAPI • Streamlit • ChromaDB • Docker
+        Built with Python • FastAPI •
+        Streamlit • ChromaDB • Docker
 
     </div>
     """
